@@ -3,22 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>ru.ncti.modulebackend</groupId>
-    <artifactId>module-backend</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
-
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.2</version>
+        <groupId>ru.ncti.modulebackend</groupId>
+        <artifactId>module-backend</artifactId>
+        <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <modules>
-        <module>core</module>
-        <module>common-jpa</module>
-    </modules>
+    <artifactId>common-jpa</artifactId>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -29,13 +20,12 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.5.4</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
     </dependencies>
 
