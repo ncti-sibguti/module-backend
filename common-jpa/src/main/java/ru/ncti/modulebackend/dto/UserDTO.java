@@ -1,44 +1,16 @@
-package ru.ncti.modulebackend.entiny;
+package ru.ncti.modulebackend.dto;
 
-import javax.persistence.*;
 import java.util.Set;
 
-@Entity
-@Table(name = "users")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-public abstract class User {
+public class UserDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "first_name")
     private String firstname;
-    @Column(name = "last_name")
     private String lastname;
-    @Column(name = "surname")
     private String surname;
-    @Column(name = "email")
     private String email;
-    @Column(name = "usernmae")
     private String username;
-    @Column(name = "password")
     private String password;
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "user_role",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    private Set<String> roles;
 
     public String getFirstname() {
         return firstname;
@@ -88,11 +60,11 @@ public abstract class User {
         this.password = password;
     }
 
-    public Set<Role> getRoles() {
+    public Set<String> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<Role> roles) {
+    public void setRoles(Set<String> roles) {
         this.roles = roles;
     }
 }
