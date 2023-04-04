@@ -22,7 +22,7 @@ public class UserDetailsImpl implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authority = new ArrayList<>();
         for (Role role : user.getRoles())
-            authority.add(new SimpleGrantedAuthority(role.toString()));
+            authority.add(new SimpleGrantedAuthority(role.getName()));
         return authority;
     }
 

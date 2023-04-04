@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.ncti.modulebackend.dto.UserDTO;
+import ru.ncti.modulebackend.entiny.Admin;
 import ru.ncti.modulebackend.entiny.Role;
 import ru.ncti.modulebackend.entiny.Student;
 import ru.ncti.modulebackend.entiny.User;
@@ -21,6 +22,7 @@ import ru.ncti.modulebackend.security.JwtTokenUtil;
 import ru.ncti.modulebackend.security.UserDetailsImpl;
 import ru.ncti.modulebackend.security.UserDetailsServiceImpl;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -53,11 +55,11 @@ public class AuthService {
     }
 
     public User register(UserDTO dto) {
-        if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
+        if (userRepository.findByUsernameOrEmail(dto.getUsername(), dto.getUsername()).isPresent()) {
             throw new UsernameNotFoundException("User " + dto.getUsername() + " already exist");
         }
 
-        User candidate = convert(dto, Student.class);
+        User candidate = convert(dto, Admin.class);
 
         Set<Role> roles = new HashSet<>(dto.getRoles().size());
         for (String role : dto.getRoles()) {
@@ -65,7 +67,7 @@ public class AuthService {
             if (roleRepository.findByName(role).isPresent())
                 roles.add(roleRepository.findByName(role).get());
         }
-        System.out.println(roles);
+
         candidate.setRoles(roles);
         candidate.setPassword(passwordEncoder.encode(dto.getPassword()));
         userRepository.save(candidate);
@@ -80,9 +82,25 @@ public class AuthService {
 
         var userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(dto.getUsername());
 
-        String token = jwtTokenUtil.generateToken(userDetails);
+        String accessToken = jwtTokenUtil.generateToken(userDetails);
+        String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
 
-        return Map.of("token", token);
+        return Map.of("accessToken", accessToken, "refreshToken", refreshToken);
+    }
+
+    public Map<String, String> refreshAndGetAuthenticationToken(HttpServletRequest request) {
+        String authToken = request.getHeader("Authorization");
+        final String token = authToken.substring(7);
+        String username = jwtTokenUtil.getUsernameFromToken(token);
+        UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
+
+        if (jwtTokenUtil.validateRefreshToken(token, userDetails)) {
+            String accessToken = jwtTokenUtil.generateToken(userDetails);
+            String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
+
+            return Map.of("accessToken", accessToken, "refreshToken", refreshToken);
+        }
+        return null;
     }
 
     private <S, D> D convert(S source, Class<D> dClass) {
