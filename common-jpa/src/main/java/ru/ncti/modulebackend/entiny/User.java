@@ -24,7 +24,9 @@ public abstract class User {
     private String username;
     @Column(name = "password")
     private String password;
-    @ManyToMany(cascade = CascadeType.ALL)
+
+    @Column(name = "role")
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),

@@ -6,10 +6,11 @@ import ru.ncti.modulebackend.dto.UserDTO;
 import ru.ncti.modulebackend.security.AuthDTO;
 import ru.ncti.modulebackend.service.AuthService;
 
+import javax.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-
 
     private final AuthService authService;
 
@@ -29,6 +30,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthDTO dto) {
         return ResponseEntity.ok(authService.login(dto));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshAndGetAuthenticationToken(HttpServletRequest request) {
+        return ResponseEntity.ok(authService.refreshAndGetAuthenticationToken(request));
     }
 
 }
