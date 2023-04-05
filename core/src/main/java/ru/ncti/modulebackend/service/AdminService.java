@@ -3,16 +3,11 @@ package ru.ncti.modulebackend.service;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.ncti.modulebackend.dto.NewsDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
 import ru.ncti.modulebackend.dto.TeacherDTO;
-import ru.ncti.modulebackend.entiny.Group;
-import ru.ncti.modulebackend.entiny.Role;
-import ru.ncti.modulebackend.entiny.Student;
-import ru.ncti.modulebackend.entiny.Teacher;
-import ru.ncti.modulebackend.repository.GroupRepository;
-import ru.ncti.modulebackend.repository.RoleRepository;
-import ru.ncti.modulebackend.repository.StudentRepository;
-import ru.ncti.modulebackend.repository.TeacherRepository;
+import ru.ncti.modulebackend.entiny.*;
+import ru.ncti.modulebackend.repository.*;
 
 import java.util.Set;
 
@@ -25,19 +20,22 @@ public class AdminService {
     private final GroupRepository groupRepository;
     private final RoleRepository roleRepository;
     private final TeacherRepository teacherRepository;
+    private final NewsRepository newsRepository;
 
     public AdminService(StudentRepository studentRepository,
                         ModelMapper modelMapper,
                         PasswordEncoder passwordEncoder,
                         GroupRepository groupRepository,
                         RoleRepository roleRepository,
-                        TeacherRepository teacherRepository) {
+                        TeacherRepository teacherRepository,
+                        NewsRepository newsRepository) {
         this.studentRepository = studentRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
         this.groupRepository = groupRepository;
         this.roleRepository = roleRepository;
         this.teacherRepository = teacherRepository;
+        this.newsRepository = newsRepository;
     }
 
 
@@ -65,6 +63,12 @@ public class AdminService {
         teacherRepository.save(teacher);
 
         return teacher;
+    }
+
+    public News createNews(NewsDTO dto) {
+        News news = convert(dto, News.class);
+        newsRepository.save(news);
+        return news;
     }
 
     private <S, D> D convert(S source, Class<D> dClass) {
