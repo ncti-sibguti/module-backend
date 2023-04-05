@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.ncti.modulebackend.dto.NewsDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
 import ru.ncti.modulebackend.dto.TeacherDTO;
 import ru.ncti.modulebackend.service.AdminService;
@@ -30,6 +31,11 @@ public class AdminController {
     @PostMapping("/create-teacher")
     public ResponseEntity<?> createTeacher(@RequestBody TeacherDTO dto) {
         return ResponseEntity.ok(adminService.createTeacher(dto));
+    }
+
+    @PostMapping("/add-news")
+    public ResponseEntity<?> addNews(@RequestBody NewsDTO dto) {
+        return ResponseEntity.ok(adminService.createNews(dto));
     }
 
 }
