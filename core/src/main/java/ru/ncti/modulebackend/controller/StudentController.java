@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ncti.modulebackend.service.StudentService;
 
-// TODO: create general endpoints
 @RestController
 @RequestMapping("/student")
 @PreAuthorize("hasRole('STUDENT')")
@@ -20,8 +19,7 @@ public class StudentController {
     }
 
     @GetMapping()
-    public ResponseEntity<?> getInfo() {
+    public ResponseEntity<?> getSchedule() {
         return ResponseEntity.ok(studentService.getOne());
     }
-
 }

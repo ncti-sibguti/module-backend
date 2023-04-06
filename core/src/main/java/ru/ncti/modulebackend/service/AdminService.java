@@ -7,6 +7,8 @@ import ru.ncti.modulebackend.dto.NewsDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
 import ru.ncti.modulebackend.dto.TeacherDTO;
 import ru.ncti.modulebackend.entiny.*;
+import ru.ncti.modulebackend.exception.GroupNotFoundException;
+import ru.ncti.modulebackend.exception.RoleNotFoundException;
 import ru.ncti.modulebackend.repository.*;
 
 import java.util.Set;
@@ -37,14 +39,14 @@ public class AdminService {
         this.teacherRepository = teacherRepository;
         this.newsRepository = newsRepository;
     }
-
-
-    // TODO: create custom exceptions
-    public Student createStudent(StudentDTO dto) {
+    
+    public Student createStudent(StudentDTO dto) throws Exception {
         Student student = convert(dto, Student.class);
 
-        Role role = roleRepository.findByName("ROLE_STUDENT").orElseThrow(null);
-        Group group = groupRepository.findById(dto.getGroupId()).orElseThrow(null);
+        Role role = roleRepository.findByName("ROLE_STUDENT")
+                .orElseThrow(() -> new RoleNotFoundException("ROLE_STUDENT not found"));
+        Group group = groupRepository.findById(dto.getGroupId())
+                .orElseThrow(() -> new GroupNotFoundException("Group not found"));
         student.setGroup(group);
         student.setPassword(passwordEncoder.encode(dto.getPassword()));
         student.setRoles(Set.of(role));
