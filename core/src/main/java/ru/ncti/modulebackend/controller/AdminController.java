@@ -24,7 +24,11 @@ public class AdminController {
 
     @PostMapping("/create-student")
     public ResponseEntity<?> createStudent(@RequestBody StudentDTO dto) {
-        return ResponseEntity.ok(adminService.createStudent(dto));
+        try {
+            return ResponseEntity.ok(adminService.createStudent(dto));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 
