@@ -1,24 +1,25 @@
 package ru.ncti.modulebackend;
 
-public class EmailDetails {
+import java.util.Map;
+
+public class Email {
 
     private String recipient;
-    private String msgBody;
     private String subject;
     private String attachment;
+    private Map<String, ?> map;
 
-    public EmailDetails() {
+    public Email() {
     }
 
-    public EmailDetails(String recipient, String msgBody, String subject) {
+    public Email(String recipient, String subject, Map<String, ?> map) {
         this.recipient = recipient;
-        this.msgBody = msgBody;
         this.subject = subject;
+        this.map = map;
     }
 
-    public EmailDetails(String recipient, String msgBody, String subject, String attachment) {
+    public Email(String recipient, String subject, String attachment) {
         this.recipient = recipient;
-        this.msgBody = msgBody;
         this.subject = subject;
         this.attachment = attachment;
     }
@@ -29,14 +30,6 @@ public class EmailDetails {
 
     public void setRecipient(String recipient) {
         this.recipient = recipient;
-    }
-
-    public String getMsgBody() {
-        return msgBody;
-    }
-
-    public void setMsgBody(String msgBody) {
-        this.msgBody = msgBody;
     }
 
     public String getSubject() {
@@ -53,5 +46,13 @@ public class EmailDetails {
 
     public void setAttachment(String attachment) {
         this.attachment = attachment;
+    }
+
+    public Map<String, ?> getMap() {
+        return map;
+    }
+
+    public void setMap(Map<String, ?> map) {
+        this.map = map;
     }
 }
