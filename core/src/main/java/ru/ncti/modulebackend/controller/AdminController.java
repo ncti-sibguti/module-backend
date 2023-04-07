@@ -6,9 +6,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.ncti.modulebackend.EmailDetails;
 import ru.ncti.modulebackend.dto.NewsDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
 import ru.ncti.modulebackend.dto.TeacherDTO;
+import ru.ncti.modulebackend.impl.EmailServiceImpl;
 import ru.ncti.modulebackend.service.AdminService;
 
 @RestController
@@ -17,9 +19,11 @@ import ru.ncti.modulebackend.service.AdminService;
 public class AdminController {
 
     private final AdminService adminService;
+    private final EmailServiceImpl emailService;
 
-    public AdminController(AdminService adminService) {
+    public AdminController(AdminService adminService, EmailServiceImpl emailService) {
         this.adminService = adminService;
+        this.emailService = emailService;
     }
 
     @PostMapping("/create-student")
@@ -40,6 +44,13 @@ public class AdminController {
     @PostMapping("/add-news")
     public ResponseEntity<?> addNews(@RequestBody NewsDTO dto) {
         return ResponseEntity.ok(adminService.createNews(dto));
+    }
+
+
+    @PostMapping("/send")
+    public ResponseEntity<?> sendMessage() {
+        return ResponseEntity.ok(emailService.sendSimpleMail(
+                new EmailDetails("mail@gmail.com","Hey! \n\n This a simple Email", "Simple Email message")));
     }
 
 }
