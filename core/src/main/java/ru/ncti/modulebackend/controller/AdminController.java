@@ -6,12 +6,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.ncti.modulebackend.EmailDetails;
+import ru.ncti.modulebackend.Email;
 import ru.ncti.modulebackend.dto.NewsDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
 import ru.ncti.modulebackend.dto.TeacherDTO;
 import ru.ncti.modulebackend.impl.EmailServiceImpl;
 import ru.ncti.modulebackend.service.AdminService;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
@@ -50,7 +52,8 @@ public class AdminController {
     @PostMapping("/send")
     public ResponseEntity<?> sendMessage() {
         return ResponseEntity.ok(emailService.sendSimpleMail(
-                new EmailDetails("mail@gmail.com","Hey! \n\n This a simple Email", "Simple Email message")));
+                new Email("addres@gmail.com", "Notification message",
+                        Map.of("username", "username", "password", "password"))));
     }
 
 }
