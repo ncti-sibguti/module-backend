@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.ncti.modulebackend.dto.NewsDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
+import ru.ncti.modulebackend.dto.SubjectDTO;
 import ru.ncti.modulebackend.dto.TeacherDTO;
 import ru.ncti.modulebackend.entiny.*;
 import ru.ncti.modulebackend.exception.GroupNotFoundException;
@@ -24,6 +25,7 @@ public class AdminService {
     private final RoleRepository roleRepository;
     private final TeacherRepository teacherRepository;
     private final NewsRepository newsRepository;
+    private final SubjectRepository subjectRepository;
 
     public AdminService(StudentRepository studentRepository,
                         ModelMapper modelMapper,
@@ -31,7 +33,8 @@ public class AdminService {
                         GroupRepository groupRepository,
                         RoleRepository roleRepository,
                         TeacherRepository teacherRepository,
-                        NewsRepository newsRepository) {
+                        NewsRepository newsRepository,
+                        SubjectRepository subjectRepository) {
         this.studentRepository = studentRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
@@ -39,8 +42,9 @@ public class AdminService {
         this.roleRepository = roleRepository;
         this.teacherRepository = teacherRepository;
         this.newsRepository = newsRepository;
+        this.subjectRepository = subjectRepository;
     }
-    
+
     public Student createStudent(StudentDTO dto) throws Exception {
         Student student = convert(dto, Student.class);
 
@@ -58,14 +62,20 @@ public class AdminService {
     }
 
     public Teacher createTeacher(TeacherDTO dto) {
-
         Teacher teacher = convert(dto, Teacher.class);
         Role role = roleRepository.findByName("ROLE_TEACHER").orElseThrow(null);
         teacher.setRoles(Set.of(role));
         teacher.setPassword(passwordEncoder.encode(dto.getPassword()));
-        teacherRepository.save(teacher);
 
+        teacherRepository.save(teacher);
         return teacher;
+    }
+
+    public Subject createSubject(SubjectDTO dto) {
+        Subject subject = convert(dto, Subject.class);
+        teacherRepository.findById(dto.getTeacher()).ifPresent(subject::setTeacher);
+        subjectRepository.save(subject);
+        return subject;
     }
 
     public News createNews(NewsDTO dto) {
