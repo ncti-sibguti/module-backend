@@ -3,16 +3,30 @@ package ru.ncti.modulebackend.service;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.ncti.modulebackend.dto.AdminDTO;
 import ru.ncti.modulebackend.dto.NewsDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
 import ru.ncti.modulebackend.dto.SubjectDTO;
 import ru.ncti.modulebackend.dto.TeacherDTO;
-import ru.ncti.modulebackend.entiny.*;
+import ru.ncti.modulebackend.entiny.Admin;
+import ru.ncti.modulebackend.entiny.Group;
+import ru.ncti.modulebackend.entiny.News;
+import ru.ncti.modulebackend.entiny.Role;
+import ru.ncti.modulebackend.entiny.Student;
+import ru.ncti.modulebackend.entiny.Subject;
+import ru.ncti.modulebackend.entiny.Teacher;
 import ru.ncti.modulebackend.exception.GroupNotFoundException;
 import ru.ncti.modulebackend.exception.RoleNotFoundException;
-import ru.ncti.modulebackend.repository.*;
+import ru.ncti.modulebackend.repository.AdminRepository;
+import ru.ncti.modulebackend.repository.GroupRepository;
+import ru.ncti.modulebackend.repository.NewsRepository;
+import ru.ncti.modulebackend.repository.RoleRepository;
+import ru.ncti.modulebackend.repository.StudentRepository;
+import ru.ncti.modulebackend.repository.SubjectRepository;
+import ru.ncti.modulebackend.repository.TeacherRepository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -26,6 +40,7 @@ public class AdminService {
     private final TeacherRepository teacherRepository;
     private final NewsRepository newsRepository;
     private final SubjectRepository subjectRepository;
+    private final AdminRepository adminRepository;
 
     public AdminService(StudentRepository studentRepository,
                         ModelMapper modelMapper,
@@ -34,7 +49,8 @@ public class AdminService {
                         RoleRepository roleRepository,
                         TeacherRepository teacherRepository,
                         NewsRepository newsRepository,
-                        SubjectRepository subjectRepository) {
+                        SubjectRepository subjectRepository,
+                        AdminRepository adminRepository) {
         this.studentRepository = studentRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
@@ -43,6 +59,15 @@ public class AdminService {
         this.teacherRepository = teacherRepository;
         this.newsRepository = newsRepository;
         this.subjectRepository = subjectRepository;
+        this.adminRepository = adminRepository;
+    }
+
+    public AdminDTO getInfoById(Long id) {
+        Admin admin = adminRepository.findById(id).orElse(null);
+        if (admin != null) {
+            return convert(admin, AdminDTO.class);
+        }
+        return null;
     }
 
     public Student createStudent(StudentDTO dto) throws Exception {

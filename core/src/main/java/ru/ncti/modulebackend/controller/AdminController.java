@@ -2,7 +2,12 @@ package ru.ncti.modulebackend.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.ncti.modulebackend.Email;
 import ru.ncti.modulebackend.dto.NewsDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
@@ -24,6 +29,11 @@ public class AdminController {
     public AdminController(AdminService adminService, EmailServiceImpl emailService) {
         this.adminService = adminService;
         this.emailService = emailService;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getInfoById(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(adminService.getInfoById(id));
     }
 
     @PostMapping("/create-student")
@@ -55,7 +65,6 @@ public class AdminController {
     public ResponseEntity<?> getAll() {
         return ResponseEntity.ok(adminService.getTeachers());
     }
-
 
     @PostMapping("/send")
     public ResponseEntity<?> sendMessage() {
