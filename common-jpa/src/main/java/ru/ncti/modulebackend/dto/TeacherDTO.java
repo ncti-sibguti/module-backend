@@ -1,5 +1,7 @@
 package ru.ncti.modulebackend.dto;
 
+import java.util.Set;
+
 public class TeacherDTO {
     private String firstname;
     private String lastname;
@@ -7,6 +9,7 @@ public class TeacherDTO {
     private String email;
     private String username;
     private String password;
+
 
     public String getFirstname() {
         return firstname;
