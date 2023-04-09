@@ -1,21 +1,23 @@
 package ru.ncti.modulebackend.entiny;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
-import java.util.Set;
 
 @Entity
-@Table(name = "groups")
-public class Group {
+@Table(name = "subject")
+public class Subject {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = "group")
-    private Set<Schedule> schedule;
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "teacher_id")
+    private Teacher teacher;
 
     public Long getId() {
         return id;
@@ -33,11 +35,11 @@ public class Group {
         this.name = name;
     }
 
-    public Set<Schedule> getSchedule() {
-        return schedule;
+    public Teacher getTeacher() {
+        return teacher;
     }
 
-    public void setSchedule(Set<Schedule> schedule) {
-        this.schedule = schedule;
+    public void setTeacher(Teacher teacher) {
+        this.teacher = teacher;
     }
 }
