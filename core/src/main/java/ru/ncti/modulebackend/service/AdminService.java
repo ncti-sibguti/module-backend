@@ -11,6 +11,7 @@ import ru.ncti.modulebackend.exception.GroupNotFoundException;
 import ru.ncti.modulebackend.exception.RoleNotFoundException;
 import ru.ncti.modulebackend.repository.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -77,4 +78,7 @@ public class AdminService {
         return modelMapper.map(source, dClass);
     }
 
+    public List<Teacher> getTeachers() {
+        return teacherRepository.findAll();
+    }
 }
