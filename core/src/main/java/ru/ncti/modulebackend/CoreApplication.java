@@ -3,7 +3,6 @@ package ru.ncti.modulebackend;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
-import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -12,10 +11,6 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 @SpringBootApplication
 public class CoreApplication {
 
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
 
     @Bean
     public FreeMarkerConfigurer freemarkerClassLoaderConfig() {
