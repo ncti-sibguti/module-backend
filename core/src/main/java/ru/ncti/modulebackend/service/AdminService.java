@@ -1,5 +1,6 @@
 package ru.ncti.modulebackend.service;
 
+import javassist.NotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,8 +16,6 @@ import ru.ncti.modulebackend.entiny.Role;
 import ru.ncti.modulebackend.entiny.Student;
 import ru.ncti.modulebackend.entiny.Subject;
 import ru.ncti.modulebackend.entiny.Teacher;
-import ru.ncti.modulebackend.exception.GroupNotFoundException;
-import ru.ncti.modulebackend.exception.RoleNotFoundException;
 import ru.ncti.modulebackend.repository.AdminRepository;
 import ru.ncti.modulebackend.repository.GroupRepository;
 import ru.ncti.modulebackend.repository.NewsRepository;
@@ -26,7 +25,6 @@ import ru.ncti.modulebackend.repository.SubjectRepository;
 import ru.ncti.modulebackend.repository.TeacherRepository;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -70,13 +68,13 @@ public class AdminService {
         return null;
     }
 
-    public Student createStudent(StudentDTO dto) throws Exception {
+    public Student createStudent(StudentDTO dto) throws NotFoundException {
         Student student = convert(dto, Student.class);
 
         Role role = roleRepository.findByName("ROLE_STUDENT")
-                .orElseThrow(() -> new RoleNotFoundException("ROLE_STUDENT not found"));
-        Group group = groupRepository.findById(dto.getGroupId())
-                .orElseThrow(() -> new GroupNotFoundException("Group not found"));
+                .orElseThrow(() -> new NotFoundException("ROLE_STUDENT not found"));
+        Group group = groupRepository.findByName(dto.getGroup())
+                .orElseThrow(() -> new NotFoundException("Group not found"));
         student.setGroup(group);
         student.setPassword(passwordEncoder.encode(dto.getPassword()));
         student.setRoles(Set.of(role));
@@ -86,9 +84,10 @@ public class AdminService {
         return student;
     }
 
-    public Teacher createTeacher(TeacherDTO dto) {
+    public Teacher createTeacher(TeacherDTO dto) throws NotFoundException {
         Teacher teacher = convert(dto, Teacher.class);
-        Role role = roleRepository.findByName("ROLE_TEACHER").orElseThrow(null);
+        Role role = roleRepository.findByName("ROLE_TEACHER")
+                .orElseThrow(() -> new NotFoundException("Role not found"));
         teacher.setRoles(Set.of(role));
         teacher.setPassword(passwordEncoder.encode(dto.getPassword()));
 
@@ -103,6 +102,10 @@ public class AdminService {
         return subject;
     }
 
+    public List<Teacher> getTeachers() {
+        return teacherRepository.findAll();
+    }
+
     public News createNews(NewsDTO dto) {
         News news = convert(dto, News.class);
         newsRepository.save(news);
@@ -111,9 +114,5 @@ public class AdminService {
 
     private <S, D> D convert(S source, Class<D> dClass) {
         return modelMapper.map(source, dClass);
-    }
-
-    public List<Teacher> getTeachers() {
-        return teacherRepository.findAll();
     }
 }

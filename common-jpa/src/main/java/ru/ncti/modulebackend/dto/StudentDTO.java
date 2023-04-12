@@ -8,7 +8,7 @@ public class StudentDTO {
     private String email;
     private String username;
     private String password;
-    private Long groupId;
+    private String group;
 
     public String getFirstname() {
         return firstname;
@@ -58,11 +58,11 @@ public class StudentDTO {
         this.password = password;
     }
 
-    public Long getGroupId() {
-        return groupId;
+    public String getGroup() {
+        return group;
     }
 
-    public void setGroupId(Long groupId) {
-        this.groupId = groupId;
+    public void setGroup(String groupId) {
+        this.group = group;
     }
 }
