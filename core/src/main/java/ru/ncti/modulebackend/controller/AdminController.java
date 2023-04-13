@@ -1,7 +1,9 @@
 package ru.ncti.modulebackend.controller;
 
+import com.opencsv.exceptions.CsvException;
 import javassist.NotFoundException;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,28 +14,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import ru.ncti.modulebackend.Email;
 import ru.ncti.modulebackend.dto.NewsDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
 import ru.ncti.modulebackend.dto.SubjectDTO;
 import ru.ncti.modulebackend.dto.TeacherDTO;
-import ru.ncti.modulebackend.impl.EmailServiceImpl;
 import ru.ncti.modulebackend.service.AdminService;
 
-import java.util.Map;
+import java.io.IOException;
 
 @RestController
-@Log4j
+@Log4j2
 @RequestMapping("/admin")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     private final AdminService adminService;
-    private final EmailServiceImpl emailService;
 
-    public AdminController(AdminService adminService, EmailServiceImpl emailService) {
+    public AdminController(AdminService adminService) {
         this.adminService = adminService;
-        this.emailService = emailService;
     }
 
     @GetMapping("/{id}")
@@ -44,10 +42,10 @@ public class AdminController {
     @PostMapping("/create-student")
     public ResponseEntity<?> createStudent(@RequestBody StudentDTO dto) {
         try {
-            return ResponseEntity.ok(adminService.createStudent(dto));
-        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.createStudent(dto));
+        } catch (NotFoundException e) {
             log.error(e.getMessage());
-            return ResponseEntity.badRequest().body("Error");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -55,10 +53,10 @@ public class AdminController {
     @PostMapping("/create-teacher")
     public ResponseEntity<?> createTeacher(@RequestBody TeacherDTO dto) {
         try {
-            return ResponseEntity.ok(adminService.createTeacher(dto));
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.createTeacher(dto));
         } catch (NotFoundException e) {
             log.error(e.getMessage());
-            return ResponseEntity.badRequest().body("Error");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -72,22 +70,40 @@ public class AdminController {
         return ResponseEntity.ok(adminService.createNews(dto));
     }
 
-    @GetMapping()
-    public ResponseEntity<?> getAll() {
+    @GetMapping("/teacher")
+    public ResponseEntity<?> getTeacher() {
         return ResponseEntity.ok(adminService.getTeachers());
     }
 
-    @PostMapping("/upload")
-    public ResponseEntity<?> uploadFile(@RequestParam("file")MultipartFile file) {
-        String fileName = file.getOriginalFilename();
-        return ResponseEntity.ok(fileName);
+    @GetMapping("/students")
+    public ResponseEntity<?> getStudents() {
+        return ResponseEntity.ok(adminService.getStudents());
     }
 
-    @PostMapping("/send")
-    public ResponseEntity<?> sendMessage() {
-        return ResponseEntity.ok(emailService.sendSimpleMail(
-                new Email("addres@gmail.com", "Notification message",
-                        Map.of("username", "username", "password", "password"))));
+    @GetMapping("/groups")
+    public ResponseEntity<?> getGroups() {
+        return ResponseEntity.ok(adminService.getGroups());
     }
+
+    @PostMapping("/upload-students")
+    public ResponseEntity<?> uploadStudents(@RequestParam("file") MultipartFile file) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.uploadStudents(file));
+        } catch (IOException | CsvException e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/upload-teacher")
+    public ResponseEntity<?> uploadTeacher(@RequestParam("file") MultipartFile file) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.uploadTeacher(file));
+        } catch (IOException | CsvException | NotFoundException e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
 
 }

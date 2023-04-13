@@ -1,5 +1,6 @@
 package ru.ncti.modulebackend.service;
 
+import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Service
+@Log4j2
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -75,6 +77,7 @@ public class AuthService {
     }
 
     public Map<String, String> login(AuthDTO dto) {
+        log.info(dto);
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword()));
 
