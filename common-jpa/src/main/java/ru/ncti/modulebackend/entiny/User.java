@@ -12,21 +12,21 @@ public abstract class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "first_name")
+    @Column(name = "firstname")
     private String firstname;
-    @Column(name = "last_name")
+    @Column(name = "lastname")
     private String lastname;
     @Column(name = "surname")
     private String surname;
     @Column(name = "email")
     private String email;
-    @Column(name = "usernmae")
+    @Column(name = "username")
     private String username;
     @Column(name = "password")
     private String password;
 
     @Column(name = "role")
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -96,5 +96,19 @@ public abstract class User {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", firstname='" + firstname + '\'' +
+                ", lastname='" + lastname + '\'' +
+                ", surname='" + surname + '\'' +
+                ", email='" + email + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", roles=" + roles +
+                '}';
     }
 }

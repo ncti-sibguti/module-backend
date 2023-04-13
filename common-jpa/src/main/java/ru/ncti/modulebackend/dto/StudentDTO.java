@@ -62,7 +62,7 @@ public class StudentDTO {
         return group;
     }
 
-    public void setGroup(String groupId) {
+    public void setGroup(String group) {
         this.group = group;
     }
 }

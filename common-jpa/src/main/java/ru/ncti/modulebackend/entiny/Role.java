@@ -16,9 +16,8 @@ public class Role {
     private String name;
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "roles")
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER)
     private Set<User> users;
-
 
     public Long getId() {
         return id;
@@ -42,5 +41,13 @@ public class Role {
 
     public void setUsers(Set<User> users) {
         this.users = users;
+    }
+
+    @Override
+    public String toString() {
+        return "Role{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
     }
 }

@@ -23,17 +23,21 @@ public class UserService {
     }
 
     public List<User> getUsers(String type) {
-
         if (type != null) {
-
             switch (type) {
-                case "student": {
+                case "student" -> {
                     Optional<Role> role = roleRepository.findByName("ROLE_STUDENT");
-                    return userRepository.findAllByRolesIn(Set.of(role.get()));
+                    if (role.isPresent())
+                        return userRepository.findAllByRolesIn(Set.of(role.get()));
+                    else
+                        return Collections.emptyList();
                 }
-                case "teacher": {
+                case "teacher" -> {
                     Optional<Role> role = roleRepository.findByName("ROLE_TEACHER");
-                    return userRepository.findAllByRolesIn(Set.of(role.get()));
+                    if (role.isPresent())
+                        return userRepository.findAllByRolesIn(Set.of(role.get()));
+                    else
+                        return Collections.emptyList();
                 }
             }
 

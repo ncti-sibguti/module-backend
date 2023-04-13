@@ -1,5 +1,6 @@
 package ru.ncti.modulebackend.service;
 
+import lombok.extern.log4j.Log4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import ru.ncti.modulebackend.security.UserDetailsImpl;
 import java.util.List;
 
 @Service
+@Log4j
 public class StudentService {
 
     private final UserRepository userRepository;
@@ -26,7 +28,10 @@ public class StudentService {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         return (Student) userRepository.findByUsernameOrEmail(userDetails.getUsername(), userDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User " + userDetails.getUsername() + " not found"));
+                .orElseThrow(() -> {
+                    log.error("User username  " + userDetails.getUsername() + " not fount");
+                    return new UsernameNotFoundException("User " + userDetails.getUsername() + " not found");
+                });
     }
 
     public List<Teacher> getTeachers() {
