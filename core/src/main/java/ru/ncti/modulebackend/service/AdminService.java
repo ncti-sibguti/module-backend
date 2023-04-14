@@ -34,7 +34,6 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -199,4 +198,48 @@ public class AdminService {
     private <S, D> D convert(S source, Class<D> dClass) {
         return modelMapper.map(source, dClass);
     }
+
+    public Teacher getTeacherById(Long id) throws NotFoundException {
+        return teacherRepository.findById(id).orElseThrow(() -> {
+            log.error("Teacher with id " + id + " not found");
+            return new NotFoundException("Teacher with id + " + id + " not found");
+        });
+    }
+
+    public Student getStudentById(Long id) throws NotFoundException {
+        return studentRepository.findById(id).orElseThrow(() -> {
+            log.error("Student with id " + id + " not found");
+            return new NotFoundException("Student with id + " + id + " not found");
+        });
+    }
+
+    public String deleteStudentById(Long id) throws NotFoundException {
+        Student student = studentRepository.findById(id).orElseThrow(() -> {
+            log.error("Student with id " + id + " not found");
+            return new NotFoundException("Student with id + " + id + " not found");
+        });
+
+
+        student.getRoles().forEach(r -> r.getUsers().remove(student));
+        student.getRoles().clear();
+        studentRepository.save(student);
+
+        studentRepository.delete(student);
+        return "Student successfully deleted";
+    }
+
+    public String deleteTeacherById(Long id) throws NotFoundException {
+        Teacher teacher = teacherRepository.findById(id).orElseThrow(() -> {
+            log.error("Teacher with id " + id + " not found");
+            return new NotFoundException("Teacher with id + " + id + " not found");
+        });
+
+        teacher.getRoles().forEach(r -> r.getUsers().remove(teacher));
+        teacher.getRoles().clear();
+        teacherRepository.save(teacher);
+
+        teacherRepository.delete(teacher);
+        return "Teacher successfully deleted";
+    }
+
 }

@@ -6,6 +6,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,7 +72,7 @@ public class AdminController {
         return ResponseEntity.ok(adminService.createNews(dto));
     }
 
-    @GetMapping("/teacher")
+    @GetMapping("/teachers")
     public ResponseEntity<?> getTeacher() {
         return ResponseEntity.ok(adminService.getTeachers());
     }
@@ -105,5 +107,42 @@ public class AdminController {
         }
     }
 
+    @GetMapping("/teacher/{id}")
+    public ResponseEntity<?> getTeacherById(@PathVariable("id") Long id) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.getTeacherById(id));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/student/{id}")
+    public ResponseEntity<?> getStudentById(@PathVariable("id") Long id) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.getStudentById(id));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @DeleteMapping("/student/{id}")
+    public ResponseEntity<?> deleteStudentById(@PathVariable("id") Long id) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.deleteStudentById(id));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @DeleteMapping("/teacher/{id}")
+    public ResponseEntity<?> deleteTeacherById(@PathVariable("id") Long id) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.deleteTeacherById(id));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 
 }
