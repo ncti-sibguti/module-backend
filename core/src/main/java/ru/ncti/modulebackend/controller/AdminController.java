@@ -6,20 +6,22 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import ru.ncti.modulebackend.dto.GroupDTO;
 import ru.ncti.modulebackend.dto.NewsDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
 import ru.ncti.modulebackend.dto.SubjectDTO;
 import ru.ncti.modulebackend.dto.TeacherDTO;
+import ru.ncti.modulebackend.dto.UserDTO;
 import ru.ncti.modulebackend.service.AdminService;
 
 import java.io.IOException;
@@ -41,7 +43,16 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getInfoById(id));
     }
 
-    @PostMapping("/create-student")
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateAdminById(@PathVariable("id") Long id, @RequestBody UserDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.updateDate(id, dto));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
+        }
+    }
+
+    @PostMapping("/student")
     public ResponseEntity<?> createStudent(@RequestBody StudentDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(adminService.createStudent(dto));
@@ -51,8 +62,7 @@ public class AdminController {
         }
     }
 
-
-    @PostMapping("/create-teacher")
+    @PostMapping("/teacher")
     public ResponseEntity<?> createTeacher(@RequestBody TeacherDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(adminService.createTeacher(dto));
@@ -62,9 +72,18 @@ public class AdminController {
         }
     }
 
-    @PostMapping("/create-subject")
+    @PostMapping("/subject")
     public ResponseEntity<?> createSubject(@RequestBody SubjectDTO dto) {
         return ResponseEntity.ok(adminService.createSubject(dto));
+    }
+
+    @PostMapping("/group")
+    public ResponseEntity<?> createGroup(@RequestBody GroupDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.addGroup(dto));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
+        }
     }
 
     @PostMapping("/add-news")
@@ -125,7 +144,15 @@ public class AdminController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @GetMapping("/group/{id}")
+    public ResponseEntity<?> getGroupById(@PathVariable("id") Long id) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.getGroupById(id));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @DeleteMapping("/student/{id}")
     public ResponseEntity<?> deleteStudentById(@PathVariable("id") Long id) {
         try {
@@ -135,11 +162,19 @@ public class AdminController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @DeleteMapping("/teacher/{id}")
     public ResponseEntity<?> deleteTeacherById(@PathVariable("id") Long id) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(adminService.deleteTeacherById(id));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/group/{id}")
+    public ResponseEntity<?> deleteGroupById(@PathVariable("id") Long id) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.deleteGroupById(id));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }

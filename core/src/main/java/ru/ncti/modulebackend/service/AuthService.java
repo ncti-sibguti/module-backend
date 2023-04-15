@@ -2,19 +2,16 @@ package ru.ncti.modulebackend.service;
 
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.ncti.modulebackend.dto.UserDTO;
 import ru.ncti.modulebackend.entiny.Admin;
 import ru.ncti.modulebackend.entiny.Role;
-import ru.ncti.modulebackend.entiny.Student;
 import ru.ncti.modulebackend.entiny.User;
 import ru.ncti.modulebackend.repository.RoleRepository;
 import ru.ncti.modulebackend.repository.UserRepository;
@@ -60,12 +57,10 @@ public class AuthService {
         if (userRepository.findByUsernameOrEmail(dto.getUsername(), dto.getUsername()).isPresent()) {
             throw new UsernameNotFoundException("User " + dto.getUsername() + " already exist");
         }
-
         User candidate = convert(dto, Admin.class);
 
         Set<Role> roles = new HashSet<>(dto.getRoles().size());
         for (String role : dto.getRoles()) {
-            System.out.println(roleRepository.findByName(role).get());
             if (roleRepository.findByName(role).isPresent())
                 roles.add(roleRepository.findByName(role).get());
         }
@@ -77,7 +72,6 @@ public class AuthService {
     }
 
     public Map<String, String> login(AuthDTO dto) {
-        log.info(dto);
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword()));
 

@@ -11,10 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ncti.modulebackend.dto.AdminDTO;
+import ru.ncti.modulebackend.dto.GroupDTO;
 import ru.ncti.modulebackend.dto.NewsDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
 import ru.ncti.modulebackend.dto.SubjectDTO;
 import ru.ncti.modulebackend.dto.TeacherDTO;
+import ru.ncti.modulebackend.dto.UserDTO;
 import ru.ncti.modulebackend.entiny.Admin;
 import ru.ncti.modulebackend.entiny.Group;
 import ru.ncti.modulebackend.entiny.News;
@@ -30,7 +32,6 @@ import ru.ncti.modulebackend.repository.StudentRepository;
 import ru.ncti.modulebackend.repository.SubjectRepository;
 import ru.ncti.modulebackend.repository.TeacherRepository;
 
-import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -51,7 +52,6 @@ public class AdminService {
     private final NewsRepository newsRepository;
     private final SubjectRepository subjectRepository;
     private final AdminRepository adminRepository;
-    private final EntityManager entityManager;
 
     public AdminService(StudentRepository studentRepository,
                         ModelMapper modelMapper,
@@ -61,8 +61,7 @@ public class AdminService {
                         TeacherRepository teacherRepository,
                         NewsRepository newsRepository,
                         SubjectRepository subjectRepository,
-                        AdminRepository adminRepository,
-                        EntityManager entityManager) {
+                        AdminRepository adminRepository) {
         this.studentRepository = studentRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
@@ -72,9 +71,9 @@ public class AdminService {
         this.newsRepository = newsRepository;
         this.subjectRepository = subjectRepository;
         this.adminRepository = adminRepository;
-        this.entityManager = entityManager;
     }
 
+    @Transactional(readOnly = true)
     public AdminDTO getInfoById(Long id) {
         Admin admin = adminRepository.findById(id).orElse(null);
         if (admin != null) {
@@ -85,6 +84,25 @@ public class AdminService {
         }
     }
 
+    @Transactional(readOnly = false)
+    public Admin updateDate(Long id, UserDTO dto) throws NotFoundException {
+        Admin admin = adminRepository.findById(id).orElseThrow(() -> {
+            log.error("Admin with id " + id + " not found");
+            return new NotFoundException("Admin with id " + id + " not found");
+        });
+
+        admin.setFirstname(dto.getFirstname());
+        admin.setLastname(dto.getLastname());
+        admin.setSurname(dto.getSurname());
+        admin.setEmail(dto.getEmail());
+        admin.setUsername(dto.getUsername());
+        admin.setPassword(passwordEncoder.encode(dto.getPassword()));
+
+        adminRepository.save(admin);
+        return admin;
+    }
+
+    @Transactional(readOnly = false)
     public Student createStudent(StudentDTO dto) throws NotFoundException {
         Student student = convert(dto, Student.class);
 
@@ -107,6 +125,7 @@ public class AdminService {
         return student;
     }
 
+    @Transactional(readOnly = false)
     public Teacher createTeacher(TeacherDTO dto) throws NotFoundException {
         Teacher teacher = convert(dto, Teacher.class);
         Role role = roleRepository.findByName("ROLE_TEACHER")
@@ -121,6 +140,7 @@ public class AdminService {
         return teacher;
     }
 
+    @Transactional(readOnly = false)
     public Subject createSubject(SubjectDTO dto) {
         Subject subject = convert(dto, Subject.class);
         teacherRepository.findById(dto.getTeacher()).ifPresentOrElse(subject::setTeacher,
@@ -134,7 +154,19 @@ public class AdminService {
         return teacherRepository.findAll();
     }
 
-    @Transactional
+    @Transactional(readOnly = false)
+    public String addGroup(GroupDTO dto) throws Exception {
+        if (groupRepository.findByName(dto.getName()).isPresent()) {
+            log.error("Group" + dto.getName() + " already exist");
+            throw new Exception("Group" + dto.getName() + " already exist");
+        }
+
+        Group group = convert(dto, Group.class);
+        groupRepository.save(group);
+        return "Group was created";
+    }
+
+    @Transactional(readOnly = false)
     public News createNews(NewsDTO dto) {
         News news = convert(dto, News.class);
         newsRepository.save(news);
@@ -195,10 +227,7 @@ public class AdminService {
         return groupRepository.findAll();
     }
 
-    private <S, D> D convert(S source, Class<D> dClass) {
-        return modelMapper.map(source, dClass);
-    }
-
+    @Transactional(readOnly = true)
     public Teacher getTeacherById(Long id) throws NotFoundException {
         return teacherRepository.findById(id).orElseThrow(() -> {
             log.error("Teacher with id " + id + " not found");
@@ -206,6 +235,7 @@ public class AdminService {
         });
     }
 
+    @Transactional(readOnly = true)
     public Student getStudentById(Long id) throws NotFoundException {
         return studentRepository.findById(id).orElseThrow(() -> {
             log.error("Student with id " + id + " not found");
@@ -213,6 +243,15 @@ public class AdminService {
         });
     }
 
+    @Transactional(readOnly = true)
+    public Group getGroupById(Long id) throws NotFoundException {
+        return groupRepository.findById(id).orElseThrow(() -> {
+            log.error("Group with id " + id + " not found");
+            return new NotFoundException("Teacher with id + " + id + " not found");
+        });
+    }
+
+    @Transactional(readOnly = false)
     public String deleteStudentById(Long id) throws NotFoundException {
         Student student = studentRepository.findById(id).orElseThrow(() -> {
             log.error("Student with id " + id + " not found");
@@ -228,6 +267,7 @@ public class AdminService {
         return "Student successfully deleted";
     }
 
+    @Transactional(readOnly = false)
     public String deleteTeacherById(Long id) throws NotFoundException {
         Teacher teacher = teacherRepository.findById(id).orElseThrow(() -> {
             log.error("Teacher with id " + id + " not found");
@@ -242,4 +282,16 @@ public class AdminService {
         return "Teacher successfully deleted";
     }
 
+    public String deleteGroupById(Long id) throws NotFoundException {
+        Group group = groupRepository.findById(id).orElseThrow(() -> {
+            log.error("Group with id " + id + " not found");
+            return new NotFoundException("Group with id + " + id + " not found");
+        });
+        groupRepository.delete(group);
+        return "Group successfully deleted";
+    }
+
+    private <S, D> D convert(S source, Class<D> dClass) {
+        return modelMapper.map(source, dClass);
+    }
 }
