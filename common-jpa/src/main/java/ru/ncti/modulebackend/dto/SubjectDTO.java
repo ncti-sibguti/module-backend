@@ -4,8 +4,6 @@ public class SubjectDTO {
 
     private String name;
 
-    private Long teacher;
-
     public String getName() {
         return name;
     }
@@ -14,11 +12,4 @@ public class SubjectDTO {
         this.name = name;
     }
 
-    public Long getTeacher() {
-        return teacher;
-    }
-
-    public void setTeacher(Long teacher) {
-        this.teacher = teacher;
-    }
 }

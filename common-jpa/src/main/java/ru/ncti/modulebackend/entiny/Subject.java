@@ -2,7 +2,14 @@ package ru.ncti.modulebackend.entiny;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import java.util.Set;
 
 @Entity
 @Table(name = "subject")
@@ -15,10 +22,10 @@ public class Subject {
     @Column(name = "name")
     private String name;
 
-    @ManyToOne
+    @OneToMany(mappedBy = "subject")
     @JsonIgnore
-    @JoinColumn(name = "teacher_id")
-    private Teacher teacher;
+    private Set<Schedule> schedules;
+
 
     public Long getId() {
         return id;
@@ -36,11 +43,11 @@ public class Subject {
         this.name = name;
     }
 
-    public Teacher getTeacher() {
-        return teacher;
+    public Set<Schedule> getSchedules() {
+        return schedules;
     }
 
-    public void setTeacher(Teacher teacher) {
-        this.teacher = teacher;
+    public void setSchedules(Set<Schedule> schedules) {
+        this.schedules = schedules;
     }
 }

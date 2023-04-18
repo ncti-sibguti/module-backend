@@ -1,5 +1,7 @@
 package ru.ncti.modulebackend.entiny;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import java.util.Set;
@@ -8,14 +10,14 @@ import java.util.Set;
 public class Teacher extends User {
 
     @OneToMany(mappedBy = "teacher")
-    private Set<Subject> subject;
+    @JsonIgnore
+    private Set<Schedule> schedules;
 
-
-    public Set<Subject> getSubject() {
-        return subject;
+    public Set<Schedule> getSchedules() {
+        return schedules;
     }
 
-    public void setSubject(Set<Subject> subject) {
-        this.subject = subject;
+    public void setSchedules(Set<Schedule> schedules) {
+        this.schedules = schedules;
     }
 }

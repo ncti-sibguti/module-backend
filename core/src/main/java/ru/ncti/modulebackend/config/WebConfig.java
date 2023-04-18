@@ -20,10 +20,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins("*")
                 .allowedMethods("GET", "POST")
-                .allowedOrigins("http://localhost:300") // admin panel
+                .allowedOrigins("http://localhost:3000/") // admin panel
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*");
     }
-
 
 }
