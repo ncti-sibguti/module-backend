@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.ncti.modulebackend.dto.AdminDTO;
 import ru.ncti.modulebackend.dto.GroupDTO;
 import ru.ncti.modulebackend.dto.NewsDTO;
+import ru.ncti.modulebackend.dto.ScheduleDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
 import ru.ncti.modulebackend.dto.SubjectDTO;
 import ru.ncti.modulebackend.dto.TeacherDTO;
@@ -21,6 +22,7 @@ import ru.ncti.modulebackend.entiny.Admin;
 import ru.ncti.modulebackend.entiny.Group;
 import ru.ncti.modulebackend.entiny.News;
 import ru.ncti.modulebackend.entiny.Role;
+import ru.ncti.modulebackend.entiny.Schedule;
 import ru.ncti.modulebackend.entiny.Student;
 import ru.ncti.modulebackend.entiny.Subject;
 import ru.ncti.modulebackend.entiny.Teacher;
@@ -28,6 +30,7 @@ import ru.ncti.modulebackend.repository.AdminRepository;
 import ru.ncti.modulebackend.repository.GroupRepository;
 import ru.ncti.modulebackend.repository.NewsRepository;
 import ru.ncti.modulebackend.repository.RoleRepository;
+import ru.ncti.modulebackend.repository.ScheduleRepository;
 import ru.ncti.modulebackend.repository.StudentRepository;
 import ru.ncti.modulebackend.repository.SubjectRepository;
 import ru.ncti.modulebackend.repository.TeacherRepository;
@@ -52,6 +55,7 @@ public class AdminService {
     private final NewsRepository newsRepository;
     private final SubjectRepository subjectRepository;
     private final AdminRepository adminRepository;
+    private final ScheduleRepository scheduleRepository;
 
     public AdminService(StudentRepository studentRepository,
                         ModelMapper modelMapper,
@@ -61,7 +65,8 @@ public class AdminService {
                         TeacherRepository teacherRepository,
                         NewsRepository newsRepository,
                         SubjectRepository subjectRepository,
-                        AdminRepository adminRepository) {
+                        AdminRepository adminRepository,
+                        ScheduleRepository scheduleRepository) {
         this.studentRepository = studentRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
@@ -71,6 +76,7 @@ public class AdminService {
         this.newsRepository = newsRepository;
         this.subjectRepository = subjectRepository;
         this.adminRepository = adminRepository;
+        this.scheduleRepository = scheduleRepository;
     }
 
     @Transactional(readOnly = true)
@@ -85,7 +91,7 @@ public class AdminService {
     }
 
     @Transactional(readOnly = false)
-    public Admin updateDate(Long id, UserDTO dto) throws NotFoundException {
+    public Admin updateData(Long id, UserDTO dto) throws NotFoundException {
         Admin admin = adminRepository.findById(id).orElseThrow(() -> {
             log.error("Admin with id " + id + " not found");
             return new NotFoundException("Admin with id " + id + " not found");
@@ -142,11 +148,20 @@ public class AdminService {
 
     @Transactional(readOnly = false)
     public Subject createSubject(SubjectDTO dto) {
-        Subject subject = convert(dto, Subject.class);
-        teacherRepository.findById(dto.getTeacher()).ifPresentOrElse(subject::setTeacher,
-                () -> log.warn("Teacher with id " + dto.getTeacher() + " not found"));
-        subjectRepository.save(subject);
-        return subject;
+        return subjectRepository.save(convert(dto, Subject.class));
+    }
+
+    @Transactional(readOnly = false)
+    public String createSchedule(ScheduleDTO dto) {
+        Schedule schedule = convert(dto, Schedule.class);
+        Group g = groupRepository.findById(dto.getGroup()).orElseThrow(() -> null);
+        Subject subject = subjectRepository.findById(dto.getSubject()).orElseThrow(() -> null);
+        Teacher teacher = teacherRepository.findById(dto.getTeacher()).orElseThrow(() -> null);
+        schedule.setGroup(g);
+        schedule.setSubject(subject);
+        schedule.setTeacher(teacher);
+        scheduleRepository.save(schedule);
+        return "OK";
     }
 
     @Transactional(readOnly = true)
@@ -173,6 +188,7 @@ public class AdminService {
         return news;
     }
 
+    @Transactional(readOnly = false)
     public String uploadStudents(MultipartFile file) throws IOException, CsvValidationException {
         CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
         List<StudentDTO> students = new CsvToBeanBuilder<StudentDTO>(csvReader)
@@ -293,5 +309,9 @@ public class AdminService {
 
     private <S, D> D convert(S source, Class<D> dClass) {
         return modelMapper.map(source, dClass);
+    }
+
+    public List<Subject> getSubjects() {
+        return subjectRepository.findAll();
     }
 }

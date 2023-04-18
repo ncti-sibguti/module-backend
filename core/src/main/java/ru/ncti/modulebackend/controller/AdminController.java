@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ncti.modulebackend.dto.GroupDTO;
 import ru.ncti.modulebackend.dto.NewsDTO;
+import ru.ncti.modulebackend.dto.ScheduleDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
 import ru.ncti.modulebackend.dto.SubjectDTO;
 import ru.ncti.modulebackend.dto.TeacherDTO;
@@ -46,7 +47,7 @@ public class AdminController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateAdminById(@PathVariable("id") Long id, @RequestBody UserDTO dto) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(adminService.updateDate(id, dto));
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.updateData(id, dto));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
         }
@@ -77,6 +78,11 @@ public class AdminController {
         return ResponseEntity.ok(adminService.createSubject(dto));
     }
 
+    @PostMapping("/schedule")
+    public ResponseEntity<?> createSchedule(@RequestBody ScheduleDTO dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.createSchedule(dto));
+    }
+
     @PostMapping("/group")
     public ResponseEntity<?> createGroup(@RequestBody GroupDTO dto) {
         try {
@@ -86,7 +92,7 @@ public class AdminController {
         }
     }
 
-    @PostMapping("/add-news")
+    @PostMapping("/news")
     public ResponseEntity<?> addNews(@RequestBody NewsDTO dto) {
         return ResponseEntity.ok(adminService.createNews(dto));
     }
@@ -104,6 +110,11 @@ public class AdminController {
     @GetMapping("/groups")
     public ResponseEntity<?> getGroups() {
         return ResponseEntity.ok(adminService.getGroups());
+    }
+
+    @GetMapping("/subjects")
+    public ResponseEntity<?> getSubjects() {
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.getSubjects());
     }
 
     @PostMapping("/upload-students")

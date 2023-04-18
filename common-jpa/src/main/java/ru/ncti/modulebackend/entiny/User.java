@@ -1,5 +1,7 @@
 package ru.ncti.modulebackend.entiny;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.Set;
 
@@ -23,6 +25,7 @@ public abstract class User {
     @Column(name = "username")
     private String username;
     @Column(name = "password")
+    @JsonIgnore
     private String password;
 
     @Column(name = "role")
