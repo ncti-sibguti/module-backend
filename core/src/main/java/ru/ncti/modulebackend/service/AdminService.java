@@ -234,8 +234,12 @@ public class AdminService {
     }
 
     @Transactional(readOnly = true)
-    public List<Student> getStudents() {
-        return studentRepository.findAll();
+    public List<Student> getStudents(Long group) throws NotFoundException {
+        Group g = groupRepository.findById(group).orElseThrow(() -> {
+            log.error("Group with id " + group + " not found");
+            return new NotFoundException("Group with id " + group + " not found");
+        });
+        return studentRepository.findAllByGroup(g);
     }
 
     @Transactional(readOnly = true)

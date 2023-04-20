@@ -103,8 +103,12 @@ public class AdminController {
     }
 
     @GetMapping("/students")
-    public ResponseEntity<?> getStudents() {
-        return ResponseEntity.ok(adminService.getStudents());
+    public ResponseEntity<?> getStudents(@RequestParam("group") Long group) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.getStudents(group));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
+        }
     }
 
     @GetMapping("/groups")
