@@ -1,5 +1,7 @@
 package ru.ncti.modulebackend.controller;
 
+import javassist.NotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,8 +20,21 @@ public class StudentController {
         this.studentService = studentService;
     }
 
+    @GetMapping("/profile")
+    public ResponseEntity<?> getInfo() {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(studentService.getInfo());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @GetMapping()
     public ResponseEntity<?> getSchedule() {
-        return ResponseEntity.ok(studentService.getOne());
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(studentService.getSchedule());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 }
