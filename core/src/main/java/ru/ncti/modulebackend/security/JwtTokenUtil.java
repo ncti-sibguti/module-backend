@@ -25,6 +25,7 @@ public class JwtTokenUtil {
         }};
         return Jwts.builder().setClaims(claims)
                 .setSubject(userDetails.getUsername())
+                .setSubject(userDetails.getUser().getEmail())
                 .setIssuer("ncti-backend")
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
@@ -33,18 +34,20 @@ public class JwtTokenUtil {
 
     public String generateRefreshToken(UserDetailsImpl userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        String subject = userDetails.getUsername() == null ? userDetails.getUser().getEmail() : userDetails.getUsername();
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(userDetails.getUsername())
+                .setSubject(subject)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + refreshExpirationInMs))
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails) {
+    public Boolean validateToken(String token, UserDetailsImpl userDetails) {
         final String username = getUsernameFromToken(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        String usernameOrEmail = userDetails.getUsername() == null ? userDetails.getUser().getEmail() : userDetails.getUsername();
+        return (username.equals(usernameOrEmail) && !isTokenExpired(token));
     }
 
     public String getUsernameFromToken(String token) {
@@ -69,5 +72,4 @@ public class JwtTokenUtil {
         final Date expiration = getExpirationDateFromToken(refreshToken);
         return expiration.before(new Date());
     }
-
 }

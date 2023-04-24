@@ -1,11 +1,12 @@
 package ru.ncti.modulebackend.security.filters;
 
+import lombok.extern.log4j.Log4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.ncti.modulebackend.security.JwtTokenUtil;
+import ru.ncti.modulebackend.security.UserDetailsImpl;
 import ru.ncti.modulebackend.security.UserDetailsServiceImpl;
 
 import javax.servlet.FilterChain;
@@ -40,7 +41,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid JWT Token in Bearer Header");
             } else {
                 String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
 
                 if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
 
