@@ -3,7 +3,6 @@ package ru.ncti.modulebackend.security;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -23,9 +22,9 @@ public class JwtTokenUtil {
             put("user_id", userDetails.getUser().getId());
             put("role", userDetails.getAuthorities());
         }};
+        String subject = userDetails.getUsername() == null ? userDetails.getUser().getEmail() : userDetails.getUsername();
         return Jwts.builder().setClaims(claims)
-                .setSubject(userDetails.getUsername())
-                .setSubject(userDetails.getUser().getEmail())
+                .setSubject(subject)
                 .setIssuer("ncti-backend")
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
@@ -35,13 +34,12 @@ public class JwtTokenUtil {
     public String generateRefreshToken(UserDetailsImpl userDetails) {
         Map<String, Object> claims = new HashMap<>();
         String subject = userDetails.getUsername() == null ? userDetails.getUser().getEmail() : userDetails.getUsername();
-        return Jwts.builder()
-                .setClaims(claims)
+        return Jwts.builder().setClaims(claims)
                 .setSubject(subject)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + refreshExpirationInMs))
-                .signWith(SignatureAlgorithm.HS512, secret)
-                .compact();
+                .setIssuer("ncti-backend")
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
+                .signWith(SignatureAlgorithm.HS512, secret).compact();
     }
 
     public Boolean validateToken(String token, UserDetailsImpl userDetails) {
@@ -63,9 +61,10 @@ public class JwtTokenUtil {
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getExpiration();
     }
 
-    public boolean validateRefreshToken(String refreshToken, UserDetails userDetails) {
+    public boolean validateRefreshToken(String refreshToken, UserDetailsImpl userDetails) {
         final String username = getUsernameFromToken(refreshToken);
-        return (username.equals(userDetails.getUsername()) && !isRefreshTokenExpired(refreshToken));
+        String usernameOrEmail = userDetails.getUsername() == null ? userDetails.getUser().getEmail() : userDetails.getUsername();
+        return (username.equals(usernameOrEmail) && !isRefreshTokenExpired(refreshToken));
     }
 
     private boolean isRefreshTokenExpired(String refreshToken) {
