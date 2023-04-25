@@ -33,8 +33,7 @@ public class TeacherService {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         return (Teacher) userRepository
-//                .findByUsernameOrEmail(userDetails.getUser().getUsername(), userDetails.getUser().getEmail()) -> not work
-                .findByUsernameOrEmail(userDetails.getUser().getEmail(), userDetails.getUser().getEmail())
+                .findById(userDetails.getUser().getId())
                 .orElseThrow(() -> {
                     log.error("Teacher not found");
                     return new NotFoundException("Teacher not found");
@@ -44,15 +43,13 @@ public class TeacherService {
     public List<Schedule> getSchedule() throws NotFoundException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
-        log.info(userDetails.getUser().getEmail());
         Teacher teacher = (Teacher) userRepository
-//                .findByUsernameOrEmail(userDetails.getUser().getUsername(), userDetails.getUser().getEmail()) -> not work
-                .findByUsernameOrEmail(userDetails.getUser().getEmail(), userDetails.getUser().getEmail())
+                .findById(userDetails.getUser().getId())
                 .orElseThrow(() -> {
                     log.error("Teacher not found");
                     return new NotFoundException("Teacher not found");
                 });
-        return scheduleRepository.findAllByTeacher(teacher);
+        return teacher.getSchedules();
     }
 
 }
