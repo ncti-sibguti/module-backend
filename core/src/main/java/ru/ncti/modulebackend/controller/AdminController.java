@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ncti.modulebackend.dto.GroupDTO;
 import ru.ncti.modulebackend.dto.NewsDTO;
+import ru.ncti.modulebackend.dto.ResatPasswordDTO;
 import ru.ncti.modulebackend.dto.ScheduleDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
 import ru.ncti.modulebackend.dto.SubjectDTO;
@@ -163,6 +164,15 @@ public class AdminController {
     public ResponseEntity<?> getGroupById(@PathVariable("id") Long id) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(adminService.getGroupById(id));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/reset")
+    public ResponseEntity<?> resetPassword(@RequestBody ResatPasswordDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.updatePasswordForUserById(dto));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
