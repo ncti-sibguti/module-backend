@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.ncti.modulebackend.dto.AdminDTO;
 import ru.ncti.modulebackend.dto.GroupDTO;
 import ru.ncti.modulebackend.dto.NewsDTO;
+import ru.ncti.modulebackend.dto.ResatPasswordDTO;
 import ru.ncti.modulebackend.dto.ScheduleDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
 import ru.ncti.modulebackend.dto.SubjectDTO;
@@ -26,6 +27,7 @@ import ru.ncti.modulebackend.entiny.Schedule;
 import ru.ncti.modulebackend.entiny.Student;
 import ru.ncti.modulebackend.entiny.Subject;
 import ru.ncti.modulebackend.entiny.Teacher;
+import ru.ncti.modulebackend.entiny.User;
 import ru.ncti.modulebackend.repository.AdminRepository;
 import ru.ncti.modulebackend.repository.GroupRepository;
 import ru.ncti.modulebackend.repository.NewsRepository;
@@ -34,6 +36,7 @@ import ru.ncti.modulebackend.repository.ScheduleRepository;
 import ru.ncti.modulebackend.repository.StudentRepository;
 import ru.ncti.modulebackend.repository.SubjectRepository;
 import ru.ncti.modulebackend.repository.TeacherRepository;
+import ru.ncti.modulebackend.repository.UserRepository;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -56,6 +59,7 @@ public class AdminService {
     private final SubjectRepository subjectRepository;
     private final AdminRepository adminRepository;
     private final ScheduleRepository scheduleRepository;
+    private final UserRepository userRepository;
 
     public AdminService(StudentRepository studentRepository,
                         ModelMapper modelMapper,
@@ -66,7 +70,8 @@ public class AdminService {
                         NewsRepository newsRepository,
                         SubjectRepository subjectRepository,
                         AdminRepository adminRepository,
-                        ScheduleRepository scheduleRepository) {
+                        ScheduleRepository scheduleRepository,
+                        UserRepository userRepository) {
         this.studentRepository = studentRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
@@ -77,6 +82,7 @@ public class AdminService {
         this.subjectRepository = subjectRepository;
         this.adminRepository = adminRepository;
         this.scheduleRepository = scheduleRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional(readOnly = true)
@@ -166,7 +172,7 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public List<Teacher> getTeachers() {
-        return teacherRepository.findAll();
+        return teacherRepository.findAllByOrderByLastname();
     }
 
     @Transactional(readOnly = false)
@@ -239,7 +245,7 @@ public class AdminService {
             log.error("Group with id " + group + " not found");
             return new NotFoundException("Group with id " + group + " not found");
         });
-        return studentRepository.findAllByGroup(g);
+        return studentRepository.findAllByGroupOrderByLastname(g);
     }
 
     @Transactional(readOnly = true)
@@ -302,6 +308,7 @@ public class AdminService {
         return "Teacher successfully deleted";
     }
 
+    @Transactional(readOnly = false)
     public String deleteGroupById(Long id) throws NotFoundException {
         Group group = groupRepository.findById(id).orElseThrow(() -> {
             log.error("Group with id " + id + " not found");
@@ -311,11 +318,24 @@ public class AdminService {
         return "Group successfully deleted";
     }
 
+    @Transactional(readOnly = true)
+    public List<Subject> getSubjects() {
+        return subjectRepository.findAll();
+    }
+
+    @Transactional(readOnly = false)
+    public String updatePasswordForUserById(ResatPasswordDTO dto) throws NotFoundException {
+        User candidate = userRepository.findById(dto.getId()).orElseThrow(() -> {
+            log.error("User with id " + dto.getPassword() + "not found");
+            return new NotFoundException("User with id " + dto.getPassword() + "not found");
+        });
+        candidate.setPassword(passwordEncoder.encode(dto.getPassword()));
+        userRepository.save(candidate);
+        return "Password update";
+    }
+
     private <S, D> D convert(S source, Class<D> dClass) {
         return modelMapper.map(source, dClass);
     }
 
-    public List<Subject> getSubjects() {
-        return subjectRepository.findAll();
-    }
 }

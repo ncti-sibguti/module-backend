@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
 
-    List<Student> findAllByGroup(Group group);
+    List<Student> findAllByGroupOrderByLastname(Group group);
 
 }

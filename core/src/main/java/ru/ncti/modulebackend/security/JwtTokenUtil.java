@@ -38,7 +38,7 @@ public class JwtTokenUtil {
                 .setSubject(subject)
                 .setIssuer("ncti-backend")
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
+                .setExpiration(new Date(System.currentTimeMillis() + refreshExpirationInMs))
                 .signWith(SignatureAlgorithm.HS512, secret).compact();
     }
 
