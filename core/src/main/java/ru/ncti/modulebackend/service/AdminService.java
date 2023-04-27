@@ -87,13 +87,8 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public AdminDTO getInfoById(Long id) {
-        Admin admin = adminRepository.findById(id).orElse(null);
-        if (admin != null) {
-            return convert(admin, AdminDTO.class);
-        } else {
-            log.warn("Admin with id " + id + " not found");
-            return null;
-        }
+        Admin admin = adminRepository.getById(id);
+        return convert(admin, AdminDTO.class);
     }
 
     @Transactional(readOnly = false)
@@ -159,13 +154,17 @@ public class AdminService {
 
     @Transactional(readOnly = false)
     public String createSchedule(ScheduleDTO dto) {
-        Schedule schedule = convert(dto, Schedule.class);
-        Group g = groupRepository.findById(dto.getGroup()).orElseThrow(() -> null);
-        Subject subject = subjectRepository.findById(dto.getSubject()).orElseThrow(() -> null);
-        Teacher teacher = teacherRepository.findById(dto.getTeacher()).orElseThrow(() -> null);
-        schedule.setGroup(g);
-        schedule.setSubject(subject);
-        schedule.setTeacher(teacher);
+        Group g = groupRepository.getById(dto.getGroup());
+        Subject subject = subjectRepository.getById(dto.getSubject());
+        Teacher teacher = teacherRepository.getById(dto.getTeacher());
+        Schedule schedule = Schedule.builder()
+                .day(dto.getDay())
+                .group(g)
+                .numberPair(dto.getNumberPair())
+                .teacher(teacher)
+                .subject(subject)
+                .classroom(dto.getClassroom())
+                .build();
         scheduleRepository.save(schedule);
         return "OK";
     }
@@ -279,11 +278,7 @@ public class AdminService {
 
     @Transactional(readOnly = false)
     public String deleteStudentById(Long id) throws NotFoundException {
-        Student student = studentRepository.findById(id).orElseThrow(() -> {
-            log.error("Student with id " + id + " not found");
-            return new NotFoundException("Student with id + " + id + " not found");
-        });
-
+        Student student = studentRepository.getById(id);
 
         student.getRoles().forEach(r -> r.getUsers().remove(student));
         student.getRoles().clear();
@@ -295,10 +290,7 @@ public class AdminService {
 
     @Transactional(readOnly = false)
     public String deleteTeacherById(Long id) throws NotFoundException {
-        Teacher teacher = teacherRepository.findById(id).orElseThrow(() -> {
-            log.error("Teacher with id " + id + " not found");
-            return new NotFoundException("Teacher with id + " + id + " not found");
-        });
+        Teacher teacher = teacherRepository.getById(id);
 
         teacher.getRoles().forEach(r -> r.getUsers().remove(teacher));
         teacher.getRoles().clear();
@@ -324,7 +316,8 @@ public class AdminService {
     }
 
     @Transactional(readOnly = false)
-    public String updatePasswordForUserById(ResatPasswordDTO dto) throws NotFoundException {
+    public String resetPasswordForUserById(ResatPasswordDTO dto) throws NotFoundException {
+        //todo: add send email with changed password
         User candidate = userRepository.findById(dto.getId()).orElseThrow(() -> {
             log.error("User with id " + dto.getPassword() + "not found");
             return new NotFoundException("User with id " + dto.getPassword() + "not found");
@@ -337,5 +330,4 @@ public class AdminService {
     private <S, D> D convert(S source, Class<D> dClass) {
         return modelMapper.map(source, dClass);
     }
-
 }
