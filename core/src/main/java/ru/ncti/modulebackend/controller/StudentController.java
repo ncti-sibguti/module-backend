@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.ncti.modulebackend.service.StudentService;
@@ -36,5 +38,15 @@ public class StudentController {
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+
+    @GetMapping("/certificate")
+    public ResponseEntity<?> getCertificates() {
+        return ResponseEntity.status(HttpStatus.OK).body(studentService.getCertificates());
+    }
+
+    @PostMapping("/certificate/{id}")
+    public ResponseEntity<?> getCertificate(@PathVariable("id") Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(studentService.getCertificate(id));
     }
 }

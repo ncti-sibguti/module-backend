@@ -172,7 +172,7 @@ public class AdminController {
     @PutMapping("/reset")
     public ResponseEntity<?> resetPassword(@RequestBody ResatPasswordDTO dto) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(adminService.updatePasswordForUserById(dto));
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.resetPasswordForUserById(dto));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
