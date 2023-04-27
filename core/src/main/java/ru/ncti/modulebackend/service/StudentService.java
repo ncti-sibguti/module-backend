@@ -2,6 +2,7 @@ package ru.ncti.modulebackend.service;
 
 import javassist.NotFoundException;
 import lombok.extern.log4j.Log4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ru.ncti.modulebackend.entiny.Certificate;
@@ -16,7 +17,6 @@ import ru.ncti.modulebackend.repository.TeacherRepository;
 import ru.ncti.modulebackend.repository.UserRepository;
 import ru.ncti.modulebackend.security.UserDetailsImpl;
 
-import javax.mail.MessagingException;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static ru.ncti.modulebackend.model.RabbitQueue.CERTIFICATE_UPDATE;
 
 @Service
 @Log4j
@@ -38,6 +40,7 @@ public class StudentService {
     private final GroupRepository groupRepository;
     private final CertificateRepository certificateRepository;
     private final EmailSenderService emailSenderService;
+    private final RabbitTemplate rabbitTemplate;
 
     public StudentService(UserRepository userRepository,
                           TeacherRepository teacherRepository,
@@ -45,7 +48,8 @@ public class StudentService {
                           ScheduleRepository scheduleRepository,
                           GroupRepository groupRepository,
                           CertificateRepository certificateRepository,
-                          EmailSenderService emailSenderService) {
+                          EmailSenderService emailSenderService,
+                          RabbitTemplate rabbitTemplate) {
         this.userRepository = userRepository;
         this.teacherRepository = teacherRepository;
         this.studentRepository = studentRepository;
@@ -53,6 +57,7 @@ public class StudentService {
         this.groupRepository = groupRepository;
         this.certificateRepository = certificateRepository;
         this.emailSenderService = emailSenderService;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     public Student getInfo() throws NotFoundException {
@@ -114,11 +119,7 @@ public class StudentService {
         properties.put("subscriptionDate", LocalDate.now().toString());
         email.setProperties(properties);
 
-        try {
-            emailSenderService.sendEmail(email);
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
-        }
+        rabbitTemplate.convertAndSend(CERTIFICATE_UPDATE, email);
 
         return "OK";
     }

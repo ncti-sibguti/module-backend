@@ -19,6 +19,7 @@
         <module>core</module>
         <module>common-jpa</module>
         <module>mail</module>
+        <module>rabbitmq</module>
     </modules>
 
     <properties>
