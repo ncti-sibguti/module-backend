@@ -5,10 +5,8 @@ import lombok.extern.log4j.Log4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import ru.ncti.modulebackend.entiny.Certificate;
 import ru.ncti.modulebackend.entiny.Schedule;
 import ru.ncti.modulebackend.entiny.Student;
-import ru.ncti.modulebackend.model.Email;
 import ru.ncti.modulebackend.repository.CertificateRepository;
 import ru.ncti.modulebackend.repository.GroupRepository;
 import ru.ncti.modulebackend.repository.ScheduleRepository;
@@ -17,17 +15,13 @@ import ru.ncti.modulebackend.repository.TeacherRepository;
 import ru.ncti.modulebackend.repository.UserRepository;
 import ru.ncti.modulebackend.security.UserDetailsImpl;
 
-import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static ru.ncti.modulebackend.model.RabbitQueue.CERTIFICATE_UPDATE;
 
 @Service
 @Log4j
@@ -96,32 +90,31 @@ public class StudentService {
         return map;
     }
 
-    public List<Certificate> getCertificates() {
-        return certificateRepository.findAll();
-    }
-
-    public String getCertificate(Long id) {
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
-        Student student = studentRepository.getById(userDetails.getUser().getId());
-
-        Certificate certificate = certificateRepository.getById(id);
-
-        // todo: send message on rabbitmq or kafka
-
-        Email email = new Email();
-        email.setTo(student.getEmail());
-        email.setSubject("Welcome Email from NCTI");
-        email.setTemplate("notification-email.html");
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("name", student.getFirstname());
-        properties.put("certificateType", certificate.getName());
-        properties.put("subscriptionDate", LocalDate.now().toString());
-        email.setProperties(properties);
-
-        rabbitTemplate.convertAndSend(CERTIFICATE_UPDATE, email);
-
-        return "OK";
-    }
+// part 2
+//    public List<Certificate> getCertificates() {
+//        return certificateRepository.findAll();
+//    }
+//
+//    public String getCertificate(Long id) {
+//        var auth = SecurityContextHolder.getContext().getAuthentication();
+//        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+//        Student student = studentRepository.getById(userDetails.getUser().getId());
+//
+//        Certificate certificate = certificateRepository.getById(id);
+//
+//        Email email = new Email();
+//        email.setTo(student.getEmail());
+//        email.setSubject("Welcome Email from NCTI");
+//        email.setTemplate("notification-email.html");
+//        Map<String, Object> properties = new HashMap<>();
+//        properties.put("name", student.getFirstname());
+//        properties.put("certificateType", certificate.getName());
+//        properties.put("subscriptionDate", LocalDate.now().toString());
+//        email.setProperties(properties);
+//
+//        rabbitTemplate.convertAndSend(CERTIFICATE_UPDATE, email);
+//
+//        return "OK";
+//    }
 
 }

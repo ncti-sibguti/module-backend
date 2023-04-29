@@ -6,6 +6,7 @@ import com.opencsv.exceptions.CsvValidationException;
 import javassist.NotFoundException;
 import lombok.extern.log4j.Log4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import ru.ncti.modulebackend.entiny.Student;
 import ru.ncti.modulebackend.entiny.Subject;
 import ru.ncti.modulebackend.entiny.Teacher;
 import ru.ncti.modulebackend.entiny.User;
+import ru.ncti.modulebackend.model.Email;
 import ru.ncti.modulebackend.repository.AdminRepository;
 import ru.ncti.modulebackend.repository.GroupRepository;
 import ru.ncti.modulebackend.repository.NewsRepository;
@@ -41,9 +43,14 @@ import ru.ncti.modulebackend.repository.UserRepository;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
+import static ru.ncti.modulebackend.model.RabbitQueue.EMAIL_UPDATE;
 
 @Service
 @Log4j
@@ -60,6 +67,7 @@ public class AdminService {
     private final AdminRepository adminRepository;
     private final ScheduleRepository scheduleRepository;
     private final UserRepository userRepository;
+    private final RabbitTemplate rabbitTemplate;
 
     public AdminService(StudentRepository studentRepository,
                         ModelMapper modelMapper,
@@ -71,7 +79,8 @@ public class AdminService {
                         SubjectRepository subjectRepository,
                         AdminRepository adminRepository,
                         ScheduleRepository scheduleRepository,
-                        UserRepository userRepository) {
+                        UserRepository userRepository,
+                        RabbitTemplate rabbitTemplate) {
         this.studentRepository = studentRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
@@ -83,6 +92,7 @@ public class AdminService {
         this.adminRepository = adminRepository;
         this.scheduleRepository = scheduleRepository;
         this.userRepository = userRepository;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @Transactional(readOnly = true)
@@ -129,6 +139,19 @@ public class AdminService {
 
         studentRepository.save(student);
 
+        Email email = new Email();
+        email.setTo(dto.getEmail());
+        email.setSubject("Welcome Email from NCTI");
+        email.setTemplate("welcome-email.html");
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("name", dto.getFirstname());
+        properties.put("subscriptionDate", LocalDate.now().toString());
+        properties.put("login", dto.getEmail());
+        properties.put("password", dto.getPassword());
+        email.setProperties(properties);
+
+        rabbitTemplate.convertAndSend(EMAIL_UPDATE, email);
+
         return student;
     }
 
@@ -144,6 +167,20 @@ public class AdminService {
         teacher.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         teacherRepository.save(teacher);
+
+        Email email = new Email();
+        email.setTo(dto.getEmail());
+        email.setSubject("Welcome Email from NCTI");
+        email.setTemplate("welcome-email.html");
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("name", dto.getFirstname());
+        properties.put("subscriptionDate", LocalDate.now().toString());
+        properties.put("login", dto.getEmail());
+        properties.put("password", dto.getPassword());
+        email.setProperties(properties);
+
+        rabbitTemplate.convertAndSend(EMAIL_UPDATE, email);
+
         return teacher;
     }
 
@@ -171,6 +208,7 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public List<Teacher> getTeachers() {
+        log.info(teacherRepository.getById(1L));
         return teacherRepository.findAllByOrderByLastname();
     }
 

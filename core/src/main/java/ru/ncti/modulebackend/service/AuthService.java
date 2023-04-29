@@ -9,7 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.ncti.modulebackend.dto.UserDTO;
+import ru.ncti.modulebackend.dto.AdminDTO;
 import ru.ncti.modulebackend.entiny.Admin;
 import ru.ncti.modulebackend.entiny.Role;
 import ru.ncti.modulebackend.entiny.User;
@@ -21,7 +21,6 @@ import ru.ncti.modulebackend.security.UserDetailsImpl;
 import ru.ncti.modulebackend.security.UserDetailsServiceImpl;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,20 +52,17 @@ public class AuthService {
         this.userDetailsService = userDetailsService;
     }
 
-    public User register(UserDTO dto) {
+    public User register(AdminDTO dto) {
         if (userRepository.findByUsernameOrEmail(dto.getUsername(), dto.getUsername()).isPresent()) {
             throw new UsernameNotFoundException("User " + dto.getUsername() + " already exist");
         }
         User candidate = convert(dto, Admin.class);
 
-        Set<Role> roles = new HashSet<>(dto.getRoles().size());
-        for (String role : dto.getRoles()) {
-            if (roleRepository.findByName(role).isPresent())
-                roles.add(roleRepository.findByName(role).get());
-        }
+        Role role = roleRepository.findByName("ROLE_ADMIN").orElse(null);
 
-        candidate.setRoles(roles);
+        candidate.setRoles(Set.of(role));
         candidate.setPassword(passwordEncoder.encode(dto.getPassword()));
+
         userRepository.save(candidate);
         return candidate;
     }

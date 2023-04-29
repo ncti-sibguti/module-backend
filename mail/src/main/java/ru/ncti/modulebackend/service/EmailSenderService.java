@@ -1,6 +1,7 @@
 package ru.ncti.modulebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,8 @@ import ru.ncti.modulebackend.model.Email;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.nio.charset.StandardCharsets;
+
+import static ru.ncti.modulebackend.model.RabbitQueue.EMAIL_UPDATE;
 
 @Service
 @Slf4j
@@ -24,6 +27,8 @@ public class EmailSenderService {
         this.templateEngine = templateEngine;
     }
 
+
+    @RabbitListener(queues = EMAIL_UPDATE)
     public void sendEmail(Email email) throws MessagingException {
         MimeMessage message = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());

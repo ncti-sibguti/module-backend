@@ -40,13 +40,14 @@ public class StudentController {
         }
     }
 
-    @GetMapping("/certificate")
-    public ResponseEntity<?> getCertificates() {
-        return ResponseEntity.status(HttpStatus.OK).body(studentService.getCertificates());
-    }
-
-    @PostMapping("/certificate/{id}")
-    public ResponseEntity<?> getCertificate(@PathVariable("id") Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(studentService.getCertificate(id));
-    }
+//    part 2
+//    @GetMapping("/certificate")
+//    public ResponseEntity<?> getCertificates() {
+//        return ResponseEntity.status(HttpStatus.OK).body(studentService.getCertificates());
+//    }
+//
+//    @PostMapping("/certificate/{id}")
+//    public ResponseEntity<?> getCertificate(@PathVariable("id") Long id) {
+//        return ResponseEntity.status(HttpStatus.OK).body(studentService.getCertificate(id));
+//    }
 }

@@ -3,6 +3,7 @@ package ru.ncti.modulebackend.entiny;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -23,6 +24,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "users")
+@ToString
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class User {
 
@@ -32,16 +34,21 @@ public abstract class User {
 
     @Column(name = "firstname")
     private String firstname;
+
     @Column(name = "lastname")
     private String lastname;
+
     @Column(name = "surname")
     private String surname;
+
     @Column(name = "email")
     private String email;
+
     @Column(name = "username")
     private String username;
-    @Column(name = "password")
+
     @JsonIgnore
+    @Column(name = "password")
     private String password;
 
     @Column(name = "role")

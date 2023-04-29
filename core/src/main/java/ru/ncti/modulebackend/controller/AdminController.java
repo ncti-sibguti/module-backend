@@ -26,6 +26,7 @@ import ru.ncti.modulebackend.dto.TeacherDTO;
 import ru.ncti.modulebackend.dto.UserDTO;
 import ru.ncti.modulebackend.service.AdminService;
 
+import javax.validation.Valid;
 import java.io.IOException;
 
 @RestController
@@ -55,7 +56,7 @@ public class AdminController {
     }
 
     @PostMapping("/student")
-    public ResponseEntity<?> createStudent(@RequestBody StudentDTO dto) {
+    public ResponseEntity<?> createStudent(@Valid @RequestBody StudentDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(adminService.createStudent(dto));
         } catch (NotFoundException e) {
@@ -65,7 +66,7 @@ public class AdminController {
     }
 
     @PostMapping("/teacher")
-    public ResponseEntity<?> createTeacher(@RequestBody TeacherDTO dto) {
+    public ResponseEntity<?> createTeacher(@Valid @RequestBody TeacherDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(adminService.createTeacher(dto));
         } catch (NotFoundException e) {

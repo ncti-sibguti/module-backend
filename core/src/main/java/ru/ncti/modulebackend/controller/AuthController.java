@@ -1,12 +1,16 @@
 package ru.ncti.modulebackend.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import ru.ncti.modulebackend.dto.UserDTO;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import ru.ncti.modulebackend.dto.AdminDTO;
 import ru.ncti.modulebackend.security.AuthDTO;
 import ru.ncti.modulebackend.service.AuthService;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
@@ -19,7 +23,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserDTO dto) {
+    public ResponseEntity<?> register(@Valid @RequestBody AdminDTO dto) {
         try {
             return ResponseEntity.ok(authService.register(dto));
         } catch (RuntimeException e) {

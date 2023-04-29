@@ -1,61 +1,23 @@
 package ru.ncti.modulebackend.dto;
 
-import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+
+@Getter
+@Setter
 public class TeacherDTO {
+    @NotBlank(message = "firstname is mandatory")
     private String firstname;
+    @NotBlank(message = "lastname is mandatory")
     private String lastname;
+    @NotBlank(message = "surname is mandatory")
     private String surname;
+    @Email(message = "Email is mandatory")
     private String email;
     private String username;
+    @NotBlank(message = "password is mandatory")
     private String password;
-
-
-    public String getFirstname() {
-        return firstname;
-    }
-
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
-    }
-
-    public String getLastname() {
-        return lastname;
-    }
-
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }
