@@ -1,6 +1,7 @@
 package ru.ncti.modulebackend.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ncti.modulebackend.entiny.Role;
 import ru.ncti.modulebackend.entiny.User;
 import ru.ncti.modulebackend.repository.RoleRepository;
@@ -22,6 +23,7 @@ public class UserService {
         this.roleRepository = roleRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<User> getUsers(String type) {
         if (type != null) {
             switch (type) {

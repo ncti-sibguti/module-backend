@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import ru.ncti.modulebackend.dto.AdminDTO;
 import ru.ncti.modulebackend.dto.GroupDTO;
 import ru.ncti.modulebackend.dto.NewsDTO;
 import ru.ncti.modulebackend.dto.ResatPasswordDTO;
@@ -23,7 +24,6 @@ import ru.ncti.modulebackend.dto.ScheduleDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
 import ru.ncti.modulebackend.dto.SubjectDTO;
 import ru.ncti.modulebackend.dto.TeacherDTO;
-import ru.ncti.modulebackend.dto.UserDTO;
 import ru.ncti.modulebackend.service.AdminService;
 
 import javax.validation.Valid;
@@ -47,9 +47,9 @@ public class AdminController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateAdminById(@PathVariable("id") Long id, @RequestBody UserDTO dto) {
+    public ResponseEntity<?> updatePasswordForAdminById(@PathVariable("id") Long id, @RequestBody AdminDTO dto) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(adminService.updateData(id, dto));
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.updatePasswordForAdminById(id, dto));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
         }
@@ -133,7 +133,7 @@ public class AdminController {
         }
     }
 
-    @PostMapping("/upload-teacher")
+    @PostMapping("/upload-teachers")
     public ResponseEntity<?> uploadTeacher(@RequestParam("file") MultipartFile file) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(adminService.uploadTeacher(file));

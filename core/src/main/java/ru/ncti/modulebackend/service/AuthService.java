@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ncti.modulebackend.dto.AdminDTO;
 import ru.ncti.modulebackend.entiny.Admin;
 import ru.ncti.modulebackend.entiny.Role;
@@ -52,6 +53,7 @@ public class AuthService {
         this.userDetailsService = userDetailsService;
     }
 
+    @Transactional(readOnly = false)
     public User register(AdminDTO dto) {
         if (userRepository.findByUsernameOrEmail(dto.getUsername(), dto.getUsername()).isPresent()) {
             throw new UsernameNotFoundException("User " + dto.getUsername() + " already exist");
@@ -67,6 +69,7 @@ public class AuthService {
         return candidate;
     }
 
+    @Transactional(readOnly = true)
     public Map<String, String> login(AuthDTO dto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword()));
@@ -81,6 +84,7 @@ public class AuthService {
         return Map.of("accessToken", accessToken, "refreshToken", refreshToken);
     }
 
+    @Transactional(readOnly = true)
     public Map<String, String> refreshAndGetAuthenticationToken(HttpServletRequest request) {
         String authToken = request.getHeader("Authorization");
         final String token = authToken.substring(7);

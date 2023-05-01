@@ -19,7 +19,6 @@ import ru.ncti.modulebackend.dto.ScheduleDTO;
 import ru.ncti.modulebackend.dto.StudentDTO;
 import ru.ncti.modulebackend.dto.SubjectDTO;
 import ru.ncti.modulebackend.dto.TeacherDTO;
-import ru.ncti.modulebackend.dto.UserDTO;
 import ru.ncti.modulebackend.entiny.Admin;
 import ru.ncti.modulebackend.entiny.Group;
 import ru.ncti.modulebackend.entiny.News;
@@ -29,7 +28,6 @@ import ru.ncti.modulebackend.entiny.Student;
 import ru.ncti.modulebackend.entiny.Subject;
 import ru.ncti.modulebackend.entiny.Teacher;
 import ru.ncti.modulebackend.entiny.User;
-import ru.ncti.modulebackend.model.Email;
 import ru.ncti.modulebackend.repository.AdminRepository;
 import ru.ncti.modulebackend.repository.GroupRepository;
 import ru.ncti.modulebackend.repository.NewsRepository;
@@ -43,14 +41,10 @@ import ru.ncti.modulebackend.repository.UserRepository;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-
-import static ru.ncti.modulebackend.model.RabbitQueue.EMAIL_UPDATE;
 
 @Service
 @Log4j
@@ -102,19 +96,12 @@ public class AdminService {
     }
 
     @Transactional(readOnly = false)
-    public Admin updateData(Long id, UserDTO dto) throws NotFoundException {
+    public Admin updatePasswordForAdminById(Long id, AdminDTO dto) throws NotFoundException {
         Admin admin = adminRepository.findById(id).orElseThrow(() -> {
             log.error("Admin with id " + id + " not found");
             return new NotFoundException("Admin with id " + id + " not found");
         });
-
-        admin.setFirstname(dto.getFirstname());
-        admin.setLastname(dto.getLastname());
-        admin.setSurname(dto.getSurname());
-        admin.setEmail(dto.getEmail());
-        admin.setUsername(dto.getUsername());
         admin.setPassword(passwordEncoder.encode(dto.getPassword()));
-
         adminRepository.save(admin);
         return admin;
     }
@@ -137,20 +124,11 @@ public class AdminService {
         student.setPassword(passwordEncoder.encode(dto.getPassword()));
         student.setRoles(Set.of(role));
 
+        String username = UUID.randomUUID().toString().split("-")[0];
+        student.setUsername(username);
         studentRepository.save(student);
 
-        Email email = new Email();
-        email.setTo(dto.getEmail());
-        email.setSubject("Welcome Email from NCTI");
-        email.setTemplate("welcome-email.html");
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("name", dto.getFirstname());
-        properties.put("subscriptionDate", LocalDate.now().toString());
-        properties.put("login", dto.getEmail());
-        properties.put("password", dto.getPassword());
-        email.setProperties(properties);
-
-        rabbitTemplate.convertAndSend(EMAIL_UPDATE, email);
+//        createEmailNotification(student, dto.getPassword());
 
         return student;
     }
@@ -166,20 +144,9 @@ public class AdminService {
         teacher.setRoles(Set.of(role));
         teacher.setPassword(passwordEncoder.encode(dto.getPassword()));
 
+        String username = UUID.randomUUID().toString().split("-")[0];
+        teacher.setUsername(username);
         teacherRepository.save(teacher);
-
-        Email email = new Email();
-        email.setTo(dto.getEmail());
-        email.setSubject("Welcome Email from NCTI");
-        email.setTemplate("welcome-email.html");
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("name", dto.getFirstname());
-        properties.put("subscriptionDate", LocalDate.now().toString());
-        properties.put("login", dto.getEmail());
-        properties.put("password", dto.getPassword());
-        email.setProperties(properties);
-
-        rabbitTemplate.convertAndSend(EMAIL_UPDATE, email);
 
         return teacher;
     }
@@ -208,7 +175,6 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public List<Teacher> getTeachers() {
-        log.info(teacherRepository.getById(1L));
         return teacherRepository.findAllByOrderByLastname();
     }
 
@@ -239,11 +205,12 @@ public class AdminService {
 
         List<CompletableFuture<Void>> futures = students.stream()
                 .map(student -> CompletableFuture.runAsync(() -> {
-                    Student s = convert(student, Student.class);
-                    s.setPassword(passwordEncoder.encode(student.getPassword()));
-                    roleRepository.findByName("ROLE_STUDENT").ifPresent(role -> s.setRoles(Set.of(role)));
-                    groupRepository.findByName(student.getGroup()).ifPresent(s::setGroup);
-                    studentRepository.save(s);
+                    try {
+                        createStudent(student);
+                    } catch (NotFoundException e) {
+                        log.error(e);
+                        throw new RuntimeException(e);
+                    }
                 })).toList();
 
         CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
@@ -261,10 +228,11 @@ public class AdminService {
 
         List<CompletableFuture<Void>> futures = teachers.stream()
                 .map(teacher -> CompletableFuture.runAsync(() -> {
-                    Teacher t = convert(teacher, Teacher.class);
-                    t.setPassword(passwordEncoder.encode(teacher.getPassword()));
-                    roleRepository.findByName("ROLE_TEACHER").ifPresent(role -> t.setRoles(Set.of(role)));
-                    teacherRepository.save(t);
+                    try {
+                        createTeacher(teacher);
+                    } catch (NotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
                 }))
                 .toList();
 
@@ -368,4 +336,20 @@ public class AdminService {
     private <S, D> D convert(S source, Class<D> dClass) {
         return modelMapper.map(source, dClass);
     }
+
+//    private void createEmailNotification(User dto, String password) {
+//        Email email = new Email();
+//        email.setTo(dto.getEmail());
+//        email.setSubject("Welcome Email from NCTI");
+//        email.setTemplate("welcome-email.html");
+//        Map<String, Object> properties = new HashMap<>();
+//        String login = dto.getUsername() == null ? dto.getEmail() : dto.getUsername();
+//        properties.put("name", dto.getFirstname());
+//        properties.put("subscriptionDate", LocalDate.now().toString());
+//        properties.put("login", login);
+//        properties.put("password", password);
+//        email.setProperties(properties);
+//
+//        rabbitTemplate.convertAndSend(EMAIL_UPDATE, email);
+//    }
 }
