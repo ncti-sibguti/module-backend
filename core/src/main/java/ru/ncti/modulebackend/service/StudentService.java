@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ncti.modulebackend.entiny.Schedule;
 import ru.ncti.modulebackend.entiny.Student;
 import ru.ncti.modulebackend.repository.CertificateRepository;
@@ -54,6 +55,7 @@ public class StudentService {
         this.rabbitTemplate = rabbitTemplate;
     }
 
+    @Transactional(readOnly = true)
     public Student getInfo() throws NotFoundException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
@@ -64,6 +66,7 @@ public class StudentService {
                 });
     }
 
+    @Transactional(readOnly = true)
     public Map<String, Set<Schedule>> getSchedule() throws NotFoundException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();

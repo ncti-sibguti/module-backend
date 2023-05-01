@@ -4,6 +4,7 @@ import javassist.NotFoundException;
 import lombok.extern.log4j.Log4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ncti.modulebackend.entiny.Schedule;
 import ru.ncti.modulebackend.entiny.Teacher;
 import ru.ncti.modulebackend.repository.ScheduleRepository;
@@ -29,6 +30,7 @@ public class TeacherService {
         this.userRepository = userRepository;
     }
 
+    @Transactional(readOnly = true)
     public Teacher getInfo() throws NotFoundException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
@@ -40,6 +42,7 @@ public class TeacherService {
                 });
     }
 
+    @Transactional(readOnly = true)
     public List<Schedule> getSchedule() throws NotFoundException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
