@@ -12,7 +12,13 @@ import ru.ncti.modulebackend.repository.TeacherRepository;
 import ru.ncti.modulebackend.repository.UserRepository;
 import ru.ncti.modulebackend.security.UserDetailsImpl;
 
-import java.util.List;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j
@@ -43,7 +49,7 @@ public class TeacherService {
     }
 
     @Transactional(readOnly = true)
-    public List<Schedule> getSchedule() throws NotFoundException {
+    public Map<String, Set<Schedule>> getSchedule() throws NotFoundException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         Teacher teacher = (Teacher) userRepository
@@ -52,7 +58,20 @@ public class TeacherService {
                     log.error("Teacher not found");
                     return new NotFoundException("Teacher not found");
                 });
-        return teacher.getSchedules();
+        Map<String, Set<Schedule>> map = new HashMap<>();
+
+        for (Schedule s : teacher.getSchedules()) {
+            map.computeIfAbsent(s.getDay(), k -> new HashSet<>()).add(s);
+        }
+
+        map.forEach((key, value) -> {
+            Set<Schedule> sortedSet = value.stream()
+                    .sorted(Comparator.comparingInt(Schedule::getNumberPair))
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            map.put(key, sortedSet);
+        });
+
+        return map;
     }
 
 }
