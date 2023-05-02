@@ -23,8 +23,8 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "users")
 @ToString
+@Table(name = "users")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class User {
 

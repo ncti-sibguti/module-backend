@@ -1,7 +1,24 @@
-FROM openjdk:17
+# Загрузка образа для сборки приложения
+FROM maven:3.8.3 AS build
 
-ARG JAR_FILE=core/target/*.jar
-COPY ${JAR_FILE} app.jar
+# Копирование всех файлов из текущего каталога на хост-системе в Docker-образ
+COPY . /home/app
+
+# Установка рабочей директории
+WORKDIR /home/app
+
+# Запуск сборки приложения
+RUN mvn clean package -DskipTests
+
+# Загрузка образа для запуска приложения
+FROM openjdk:17 AS run
+
+# Копирование собранного jar-файла из предыдущего образа в текущий
+ARG JAR_FILE=/home/app/core/target/*.jar
+COPY --from=build ${JAR_FILE} /home/app/app.jar
+
+# Установка рабочей директории
+WORKDIR /home/app
 
 ENV DB_URL=jdbc:postgresql://mypostgres:5432/ncti
 ENV DB_USER=postgres
@@ -9,7 +26,12 @@ ENV DB_PASSWORD=root
 ENV EMAIL_PASSWORD=qehvszevaoocrlma
 ENV EMAIL_USER=iv21an45@gmail.com
 ENV SECRET=dSgVkYp3s6v9y$B&
-ENV RABBITMQ_HOST=172.18.0.3
+ENV RABBITMQ_HOST=172.18.0.2
 
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/app.jar"]
+
+# Запуск приложения
+CMD ["java", "-jar", "app.jar"]
+
+
+
