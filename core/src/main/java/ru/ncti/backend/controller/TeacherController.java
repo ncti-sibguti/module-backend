@@ -20,10 +20,10 @@ public class TeacherController {
         this.teacherService = teacherService;
     }
 
-    @GetMapping()
-    public ResponseEntity<?> getInfo() {
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile() {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(teacherService.getInfo());
+            return ResponseEntity.status(HttpStatus.OK).body(teacherService.getProfile());
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }

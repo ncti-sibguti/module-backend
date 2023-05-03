@@ -37,7 +37,7 @@ public class TeacherService {
     }
 
     @Transactional(readOnly = true)
-    public Teacher getInfo() throws NotFoundException {
+    public Teacher getProfile() throws NotFoundException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         return (Teacher) userRepository

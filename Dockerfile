@@ -23,8 +23,8 @@ WORKDIR /home/app
 ENV DB_URL=jdbc:postgresql://mypostgres:5432/ncti
 ENV DB_USER=postgres
 ENV DB_PASSWORD=root
-ENV EMAIL_PASSWORD=qehvszevaoocrlma
-ENV EMAIL_USER=iv21an45@gmail.com
+ENV EMAIL_USER=email
+ENV EMAIL_PASSWORD=passwd
 ENV SECRET=dSgVkYp3s6v9y$B&
 ENV RABBITMQ_HOST=172.18.0.2
 

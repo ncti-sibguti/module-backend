@@ -20,15 +20,15 @@ public class StudentController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<?> getInfo() {
+    public ResponseEntity<?> getProfile() {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(studentService.getInfo());
+            return ResponseEntity.status(HttpStatus.OK).body(studentService.getProfile());
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-    @GetMapping()
+    @GetMapping("/schedule")
     public ResponseEntity<?> getSchedule() {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(studentService.getSchedule());
@@ -36,15 +36,4 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-
-//    part 2
-//    @GetMapping("/certificate")
-//    public ResponseEntity<?> getCertificates() {
-//        return ResponseEntity.status(HttpStatus.OK).body(studentService.getCertificates());
-//    }
-//
-//    @PostMapping("/certificate/{id}")
-//    public ResponseEntity<?> getCertificate(@PathVariable("id") Long id) {
-//        return ResponseEntity.status(HttpStatus.OK).body(studentService.getCertificate(id));
-//    }
 }

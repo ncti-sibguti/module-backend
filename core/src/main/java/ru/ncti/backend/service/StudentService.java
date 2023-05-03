@@ -56,7 +56,7 @@ public class StudentService {
     }
 
     @Transactional(readOnly = true)
-    public Student getInfo() throws NotFoundException {
+    public Student getProfile() throws NotFoundException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         return (Student) userRepository.findByUsernameOrEmail(userDetails.getUsername(), userDetails.getUsername())
