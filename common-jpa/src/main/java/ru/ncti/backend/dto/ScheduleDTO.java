@@ -13,4 +13,5 @@ public class ScheduleDTO {
     private Long teacher;
     private Long subject;
     private String classroom;
+    private String weekType;
 }

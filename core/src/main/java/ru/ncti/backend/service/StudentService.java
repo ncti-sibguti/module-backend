@@ -6,8 +6,10 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ncti.backend.entiny.Group;
 import ru.ncti.backend.entiny.Schedule;
 import ru.ncti.backend.entiny.Student;
+import ru.ncti.backend.entiny.enums.WeekType;
 import ru.ncti.backend.repository.CertificateRepository;
 import ru.ncti.backend.repository.GroupRepository;
 import ru.ncti.backend.repository.ScheduleRepository;
@@ -16,10 +18,14 @@ import ru.ncti.backend.repository.TeacherRepository;
 import ru.ncti.backend.repository.UserRepository;
 import ru.ncti.backend.security.UserDetailsImpl;
 
+import java.time.LocalDate;
+import java.time.temporal.WeekFields;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -79,7 +85,9 @@ public class StudentService {
 
         Map<String, Set<Schedule>> map = new HashMap<>();
 
-        for (Schedule s : student.getGroup().getSchedule()) {
+        Set<Schedule> currSchedule = getTypeSchedule(student.getGroup());
+
+        for (Schedule s : currSchedule) {
             map.computeIfAbsent(s.getDay(), k -> new HashSet<>()).add(s);
         }
 
@@ -91,6 +99,20 @@ public class StudentService {
         });
 
         return map;
+    }
+
+    private Set<Schedule> getTypeSchedule(Group group) {
+        List<Schedule> schedule = scheduleRepository.findAllByGroup(group);
+        WeekType currentWeekType = getCurrentWeekType();
+        return schedule.stream()
+                .filter(s -> s.getType() == WeekType.CONST || s.getType() == currentWeekType)
+                .collect(Collectors.toSet());
+    }
+
+    private WeekType getCurrentWeekType() {
+        LocalDate currentDate = LocalDate.now();
+        int currentWeekNumber = currentDate.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
+        return currentWeekNumber % 2 == 0 ? WeekType.EVEN : WeekType.ODD;
     }
 
 // part 2

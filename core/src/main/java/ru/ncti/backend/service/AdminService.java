@@ -28,6 +28,7 @@ import ru.ncti.backend.entiny.Student;
 import ru.ncti.backend.entiny.Subject;
 import ru.ncti.backend.entiny.Teacher;
 import ru.ncti.backend.entiny.User;
+import ru.ncti.backend.entiny.enums.WeekType;
 import ru.ncti.backend.repository.AdminRepository;
 import ru.ncti.backend.repository.GroupRepository;
 import ru.ncti.backend.repository.NewsRepository;
@@ -41,10 +42,14 @@ import ru.ncti.backend.repository.UserRepository;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.temporal.WeekFields;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j
@@ -161,6 +166,26 @@ public class AdminService {
         Group g = groupRepository.getById(dto.getGroup());
         Subject subject = subjectRepository.getById(dto.getSubject());
         Teacher teacher = teacherRepository.getById(dto.getTeacher());
+        WeekType weekType;
+
+        switch (dto.getWeekType()) {
+            case "odd" -> {
+                weekType = WeekType.ODD;
+                break;
+            }
+            case "even" -> {
+                weekType = WeekType.EVEN;
+                break;
+            }
+            case "const" -> {
+                weekType = WeekType.CONST;
+                break;
+            }
+            default -> {
+                return null;
+            }
+        }
+
         Schedule schedule = Schedule.builder()
                 .day(dto.getDay())
                 .group(g)
@@ -168,6 +193,7 @@ public class AdminService {
                 .teacher(teacher)
                 .subject(subject)
                 .classroom(dto.getClassroom())
+                .type(weekType)
                 .build();
         scheduleRepository.save(schedule);
         return "OK";
@@ -276,10 +302,14 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public Group getGroupById(Long id) throws NotFoundException {
-        return groupRepository.findById(id).orElseThrow(() -> {
+        Group g = groupRepository.findById(id).orElseThrow(() -> {
             log.error("Group with id " + id + " not found");
             return new NotFoundException("Teacher with id + " + id + " not found");
         });
+
+        g.setSchedule(getTypeSchedule(g));
+
+        return g;
     }
 
     @Transactional(readOnly = false)
@@ -335,6 +365,20 @@ public class AdminService {
 
     private <S, D> D convert(S source, Class<D> dClass) {
         return modelMapper.map(source, dClass);
+    }
+
+    private Set<Schedule> getTypeSchedule(Group group) {
+        List<Schedule> schedule = scheduleRepository.findAllByGroup(group);
+        WeekType currentWeekType = getCurrentWeekType();
+        return schedule.stream()
+                .filter(s -> s.getType() == WeekType.CONST || s.getType() == currentWeekType)
+                .collect(Collectors.toSet());
+    }
+
+    private WeekType getCurrentWeekType() {
+        LocalDate currentDate = LocalDate.now();
+        int currentWeekNumber = currentDate.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
+        return currentWeekNumber % 2 == 0 ? WeekType.EVEN : WeekType.ODD;
     }
 
 //    private void createEmailNotification(User dto, String password) {
