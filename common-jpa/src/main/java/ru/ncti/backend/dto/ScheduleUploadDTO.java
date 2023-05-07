@@ -1,17 +1,16 @@
 package ru.ncti.backend.dto;
 
-
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class ScheduleDTO {
+public class ScheduleUploadDTO {
     private String day;
-    private Long group;
-    private Integer numberPair;
-    private Long teacher;
+    private String group;
     private String subject;
-    private String classroom;
+    private String teacher;
+    private Integer numberPair;
     private String weekType;
+    private String classroom;
 }

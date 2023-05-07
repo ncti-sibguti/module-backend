@@ -16,8 +16,8 @@ import ru.ncti.backend.dto.GroupDTO;
 import ru.ncti.backend.dto.NewsDTO;
 import ru.ncti.backend.dto.ResatPasswordDTO;
 import ru.ncti.backend.dto.ScheduleDTO;
+import ru.ncti.backend.dto.ScheduleUploadDTO;
 import ru.ncti.backend.dto.StudentDTO;
-import ru.ncti.backend.dto.SubjectDTO;
 import ru.ncti.backend.dto.TeacherDTO;
 import ru.ncti.backend.entiny.Admin;
 import ru.ncti.backend.entiny.Group;
@@ -25,7 +25,6 @@ import ru.ncti.backend.entiny.News;
 import ru.ncti.backend.entiny.Role;
 import ru.ncti.backend.entiny.Schedule;
 import ru.ncti.backend.entiny.Student;
-import ru.ncti.backend.entiny.Subject;
 import ru.ncti.backend.entiny.Teacher;
 import ru.ncti.backend.entiny.User;
 import ru.ncti.backend.entiny.enums.WeekType;
@@ -35,7 +34,6 @@ import ru.ncti.backend.repository.NewsRepository;
 import ru.ncti.backend.repository.RoleRepository;
 import ru.ncti.backend.repository.ScheduleRepository;
 import ru.ncti.backend.repository.StudentRepository;
-import ru.ncti.backend.repository.SubjectRepository;
 import ru.ncti.backend.repository.TeacherRepository;
 import ru.ncti.backend.repository.UserRepository;
 
@@ -62,7 +60,6 @@ public class AdminService {
     private final RoleRepository roleRepository;
     private final TeacherRepository teacherRepository;
     private final NewsRepository newsRepository;
-    private final SubjectRepository subjectRepository;
     private final AdminRepository adminRepository;
     private final ScheduleRepository scheduleRepository;
     private final UserRepository userRepository;
@@ -75,7 +72,6 @@ public class AdminService {
                         RoleRepository roleRepository,
                         TeacherRepository teacherRepository,
                         NewsRepository newsRepository,
-                        SubjectRepository subjectRepository,
                         AdminRepository adminRepository,
                         ScheduleRepository scheduleRepository,
                         UserRepository userRepository,
@@ -87,7 +83,6 @@ public class AdminService {
         this.roleRepository = roleRepository;
         this.teacherRepository = teacherRepository;
         this.newsRepository = newsRepository;
-        this.subjectRepository = subjectRepository;
         this.adminRepository = adminRepository;
         this.scheduleRepository = scheduleRepository;
         this.userRepository = userRepository;
@@ -133,8 +128,6 @@ public class AdminService {
         student.setUsername(username);
         studentRepository.save(student);
 
-//        createEmailNotification(student, dto.getPassword());
-
         return student;
     }
 
@@ -156,42 +149,19 @@ public class AdminService {
         return teacher;
     }
 
-    @Transactional(readOnly = false)
-    public Subject createSubject(SubjectDTO dto) {
-        return subjectRepository.save(convert(dto, Subject.class));
-    }
 
     @Transactional(readOnly = false)
     public String createSchedule(ScheduleDTO dto) {
         Group g = groupRepository.getById(dto.getGroup());
-        Subject subject = subjectRepository.getById(dto.getSubject());
         Teacher teacher = teacherRepository.getById(dto.getTeacher());
-        WeekType weekType;
-
-        switch (dto.getWeekType()) {
-            case "odd" -> {
-                weekType = WeekType.ODD;
-                break;
-            }
-            case "even" -> {
-                weekType = WeekType.EVEN;
-                break;
-            }
-            case "const" -> {
-                weekType = WeekType.CONST;
-                break;
-            }
-            default -> {
-                return null;
-            }
-        }
+        WeekType weekType = weekType(dto.getWeekType());
 
         Schedule schedule = Schedule.builder()
                 .day(dto.getDay())
                 .group(g)
                 .numberPair(dto.getNumberPair())
                 .teacher(teacher)
-                .subject(subject)
+                .subject(dto.getSubject())
                 .classroom(dto.getClassroom())
                 .type(weekType)
                 .build();
@@ -270,6 +240,42 @@ public class AdminService {
         return "Uploaded teachers";
     }
 
+    @Transactional
+    public String uploadSchedule(MultipartFile file) throws IOException {
+
+        CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+        List<ScheduleUploadDTO> schedule = new CsvToBeanBuilder<ScheduleUploadDTO>(csvReader)
+                .withType(ScheduleUploadDTO.class).build().parse();
+
+        List<CompletableFuture<Void>> futures = schedule.stream()
+                .map(s -> CompletableFuture.runAsync(() -> {
+                    Group g = groupRepository.findByName(s.getGroup())
+                            .orElseThrow(() -> {
+                                log.error("Group " + s.getGroup() + " not found");
+                                return new IllegalArgumentException("Group " + s.getGroup() + " not found");
+                            });
+                    String[] teacherName = s.getTeacher().split(" ");
+                    Teacher t = teacherRepository.findByLastnameAndFirstname(teacherName[0], teacherName[1])
+                            .orElseThrow(() -> {
+                                log.error("Teacher " + s.getTeacher() + " not found");
+                                return new IllegalArgumentException("Teacher " + s.getTeacher() + " not found");
+                            });
+
+                    Schedule sch = convert(s, Schedule.class);
+                    sch.setGroup(g);
+                    sch.setTeacher(t);
+                    sch.setType(weekType(s.getWeekType()));
+                    scheduleRepository.save(sch);
+                })).toList();
+
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        allFutures.join();
+        csvReader.close();
+
+        log.info("Uploaded schedule");
+        return "Uploaded schedule";
+    }
+
     @Transactional(readOnly = true)
     public List<Student> getStudents(Long group) throws NotFoundException {
         Group g = groupRepository.findById(group).orElseThrow(() -> {
@@ -346,11 +352,6 @@ public class AdminService {
         return "Group successfully deleted";
     }
 
-    @Transactional(readOnly = true)
-    public List<Subject> getSubjects() {
-        return subjectRepository.findAll();
-    }
-
     @Transactional(readOnly = false)
     public String resetPasswordForUserById(ResatPasswordDTO dto) throws NotFoundException {
         //todo: add send email with changed password
@@ -365,6 +366,24 @@ public class AdminService {
 
     private <S, D> D convert(S source, Class<D> dClass) {
         return modelMapper.map(source, dClass);
+    }
+
+
+    private WeekType weekType(String type) {
+        switch (type) {
+            case "odd" -> {
+                return WeekType.ODD;
+            }
+            case "even" -> {
+                return WeekType.EVEN;
+            }
+            case "const" -> {
+                return WeekType.CONST;
+            }
+            default -> {
+                return null;
+            }
+        }
     }
 
     private Set<Schedule> getTypeSchedule(Group group) {

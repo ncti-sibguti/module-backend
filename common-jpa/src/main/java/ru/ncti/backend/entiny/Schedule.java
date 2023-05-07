@@ -38,15 +38,17 @@ public class Schedule {
     @JoinColumn(name = "group_id")
     private Group group;
 
+    @Column(name = "number_pair")
     private Integer numberPair;
 
     @ManyToOne
     @JoinColumn(name = "teacher_id")
     private Teacher teacher;
 
-    @ManyToOne
     @JoinColumn(name = "subject_id")
-    private Subject subject;
+    private String subject;
+
+    @Column(name = "classroom")
     private String classroom;
 
     @Column(name = "week_type")

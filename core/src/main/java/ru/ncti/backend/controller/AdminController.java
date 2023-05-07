@@ -22,7 +22,6 @@ import ru.ncti.backend.dto.NewsDTO;
 import ru.ncti.backend.dto.ResatPasswordDTO;
 import ru.ncti.backend.dto.ScheduleDTO;
 import ru.ncti.backend.dto.StudentDTO;
-import ru.ncti.backend.dto.SubjectDTO;
 import ru.ncti.backend.dto.TeacherDTO;
 import ru.ncti.backend.service.AdminService;
 
@@ -38,7 +37,6 @@ public class AdminController {
     private final static String TEACHERS_URL = "/teachers";
     private final static String STUDENTS_URL = "/students";
     private final static String GROUPS_URL = "/groups";
-    private final static String SUBJECTS_URL = "/subjects";
     private final static String NEWS_URL = "/news";
 
     private final AdminService adminService;
@@ -85,7 +83,7 @@ public class AdminController {
         }
     }
 
-    @GetMapping(STUDENTS_URL + "/{id]")
+    @GetMapping(STUDENTS_URL + "/{id}")
     public ResponseEntity<?> getStudentById(@PathVariable("id") Long id) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(adminService.getStudentById(id));
@@ -109,12 +107,6 @@ public class AdminController {
         }
     }
 
-    @GetMapping(SUBJECTS_URL)
-    public ResponseEntity<?> getSubjects() {
-        return ResponseEntity.status(HttpStatus.OK).body(adminService.getSubjects());
-    }
-
-
     @PostMapping(STUDENTS_URL)
     public ResponseEntity<?> createStudent(@Valid @RequestBody StudentDTO dto) {
         try {
@@ -135,15 +127,12 @@ public class AdminController {
         }
     }
 
-    @PostMapping(SUBJECTS_URL)
-    public ResponseEntity<?> createSubject(@RequestBody SubjectDTO dto) {
-        return ResponseEntity.ok(adminService.createSubject(dto));
-    }
 
     @PostMapping("/schedule")
     public ResponseEntity<?> createSchedule(@RequestBody ScheduleDTO dto) {
         return ResponseEntity.status(HttpStatus.OK).body(adminService.createSchedule(dto));
     }
+
 
     @PostMapping(GROUPS_URL)
     public ResponseEntity<?> createGroup(@RequestBody GroupDTO dto) {
@@ -177,6 +166,15 @@ public class AdminController {
         } catch (IOException | CsvException | NotFoundException e) {
             log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/upload-schedule")
+    public ResponseEntity<?> uploadSchedule(@RequestParam("file") MultipartFile file) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.uploadSchedule(file));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
         }
     }
 
