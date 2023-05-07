@@ -370,7 +370,7 @@ public class AdminService {
 
 
     private WeekType weekType(String type) {
-        switch (type) {
+        switch (type.trim()) {
             case "odd" -> {
                 return WeekType.ODD;
             }
