@@ -6,7 +6,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ncti.backend.entiny.Schedule;
-import ru.ncti.backend.entiny.Student;
 import ru.ncti.backend.entiny.Teacher;
 import ru.ncti.backend.entiny.enums.WeekType;
 import ru.ncti.backend.repository.ScheduleRepository;
@@ -44,25 +43,14 @@ public class TeacherService {
     @Transactional(readOnly = true)
     public Teacher getProfile() throws NotFoundException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
-        Teacher userDetails = (Teacher) auth.getPrincipal();
-        return (Teacher) userRepository
-                .findById(userDetails.getId())
-                .orElseThrow(() -> {
-                    log.error("Teacher not found");
-                    return new NotFoundException("Teacher not found");
-                });
+        return (Teacher) auth.getPrincipal();
     }
 
     @Transactional(readOnly = true)
     public Map<String, Set<Schedule>> getSchedule() throws NotFoundException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
-        Teacher userDetails = (Teacher) auth.getPrincipal();
-        Teacher teacher = (Teacher) userRepository
-                .findById(userDetails.getId())
-                .orElseThrow(() -> {
-                    log.error("Teacher not found");
-                    return new NotFoundException("Teacher not found");
-                });
+        Teacher teacher = (Teacher) auth.getPrincipal();
+
         Map<String, Set<Schedule>> map = new HashMap<>();
 
         for (Schedule s : getTypeSchedule(teacher)) {

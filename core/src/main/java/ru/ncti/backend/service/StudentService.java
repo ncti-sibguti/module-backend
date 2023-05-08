@@ -10,7 +10,6 @@ import ru.ncti.backend.entiny.Group;
 import ru.ncti.backend.entiny.Schedule;
 import ru.ncti.backend.entiny.Student;
 import ru.ncti.backend.entiny.enums.WeekType;
-import ru.ncti.backend.repository.CertificateRepository;
 import ru.ncti.backend.repository.GroupRepository;
 import ru.ncti.backend.repository.ScheduleRepository;
 import ru.ncti.backend.repository.StudentRepository;
@@ -60,24 +59,13 @@ public class StudentService {
     @Transactional(readOnly = true)
     public Student getProfile() throws NotFoundException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
-        Student userDetails = (Student) auth.getPrincipal();
-        return (Student) userRepository.findByUsernameOrEmail(userDetails.getUsername(), userDetails.getUsername())
-                .orElseThrow(() -> {
-                    log.error("User username  " + userDetails.getUsername() + " not fount");
-                    return new NotFoundException("User " + userDetails.getUsername() + " not found");
-                });
+        return (Student) auth.getPrincipal();
     }
 
     @Transactional(readOnly = true)
     public Map<String, Set<Schedule>> getSchedule() throws NotFoundException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
-        Student userDetails = (Student) auth.getPrincipal();
-        Student student = (Student) userRepository
-                .findByUsernameOrEmail(userDetails.getUsername(), userDetails.getUsername())
-                .orElseThrow(() -> {
-                    log.error("User username  " + userDetails.getUsername() + " not fount");
-                    return new NotFoundException("User " + userDetails.getUsername() + " not found");
-                });
+        Student student = (Student) auth.getPrincipal();
 
         Map<String, Set<Schedule>> map = new HashMap<>();
 
