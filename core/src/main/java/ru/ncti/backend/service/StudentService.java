@@ -16,7 +16,6 @@ import ru.ncti.backend.repository.ScheduleRepository;
 import ru.ncti.backend.repository.StudentRepository;
 import ru.ncti.backend.repository.TeacherRepository;
 import ru.ncti.backend.repository.UserRepository;
-import ru.ncti.backend.security.UserDetailsImpl;
 
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
@@ -39,7 +38,6 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final ScheduleRepository scheduleRepository;
     private final GroupRepository groupRepository;
-    private final CertificateRepository certificateRepository;
     private final EmailSenderService emailSenderService;
     private final RabbitTemplate rabbitTemplate;
 
@@ -48,7 +46,6 @@ public class StudentService {
                           StudentRepository studentRepository,
                           ScheduleRepository scheduleRepository,
                           GroupRepository groupRepository,
-                          CertificateRepository certificateRepository,
                           EmailSenderService emailSenderService,
                           RabbitTemplate rabbitTemplate) {
         this.userRepository = userRepository;
@@ -56,7 +53,6 @@ public class StudentService {
         this.studentRepository = studentRepository;
         this.scheduleRepository = scheduleRepository;
         this.groupRepository = groupRepository;
-        this.certificateRepository = certificateRepository;
         this.emailSenderService = emailSenderService;
         this.rabbitTemplate = rabbitTemplate;
     }
@@ -64,7 +60,7 @@ public class StudentService {
     @Transactional(readOnly = true)
     public Student getProfile() throws NotFoundException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Student userDetails = (Student) auth.getPrincipal();
         return (Student) userRepository.findByUsernameOrEmail(userDetails.getUsername(), userDetails.getUsername())
                 .orElseThrow(() -> {
                     log.error("User username  " + userDetails.getUsername() + " not fount");
@@ -75,7 +71,7 @@ public class StudentService {
     @Transactional(readOnly = true)
     public Map<String, Set<Schedule>> getSchedule() throws NotFoundException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Student userDetails = (Student) auth.getPrincipal();
         Student student = (Student) userRepository
                 .findByUsernameOrEmail(userDetails.getUsername(), userDetails.getUsername())
                 .orElseThrow(() -> {
@@ -114,32 +110,5 @@ public class StudentService {
         int currentWeekNumber = currentDate.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
         return currentWeekNumber % 2 == 0 ? WeekType.EVEN : WeekType.ODD;
     }
-
-// part 2
-//    public List<Certificate> getCertificates() {
-//        return certificateRepository.findAll();
-//    }
-//
-//    public String getCertificate(Long id) {
-//        var auth = SecurityContextHolder.getContext().getAuthentication();
-//        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
-//        Student student = studentRepository.getById(userDetails.getUser().getId());
-//
-//        Certificate certificate = certificateRepository.getById(id);
-//
-//        Email email = new Email();
-//        email.setTo(student.getEmail());
-//        email.setSubject("Welcome Email from NCTI");
-//        email.setTemplate("notification-email.html");
-//        Map<String, Object> properties = new HashMap<>();
-//        properties.put("name", student.getFirstname());
-//        properties.put("certificateType", certificate.getName());
-//        properties.put("subscriptionDate", LocalDate.now().toString());
-//        email.setProperties(properties);
-//
-//        rabbitTemplate.convertAndSend(CERTIFICATE_UPDATE, email);
-//
-//        return "OK";
-//    }
 
 }

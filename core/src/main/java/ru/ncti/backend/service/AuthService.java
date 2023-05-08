@@ -18,8 +18,6 @@ import ru.ncti.backend.repository.RoleRepository;
 import ru.ncti.backend.repository.UserRepository;
 import ru.ncti.backend.security.AuthDTO;
 import ru.ncti.backend.security.JwtTokenUtil;
-import ru.ncti.backend.security.UserDetailsImpl;
-import ru.ncti.backend.security.UserDetailsServiceImpl;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -35,7 +33,7 @@ public class AuthService {
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final UserDetailsServiceImpl userDetailsService;
+    private final UserService userService;
 
     public AuthService(UserRepository userRepository,
                        RoleRepository roleRepository,
@@ -43,14 +41,14 @@ public class AuthService {
                        ModelMapper modelMapper,
                        PasswordEncoder passwordEncoder,
                        AuthenticationManager authenticationManager,
-                       UserDetailsServiceImpl userDetailsService) {
+                       UserService userService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.jwtTokenUtil = jwtTokenUtil;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
-        this.userDetailsService = userDetailsService;
+        this.userService = userService;
     }
 
     @Transactional(readOnly = false)
@@ -76,7 +74,7 @@ public class AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        var userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(dto.getUsername());
+        var userDetails = (User) userService.loadUserByUsername(dto.getUsername());
 
         String accessToken = jwtTokenUtil.generateToken(userDetails);
         String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
@@ -89,7 +87,7 @@ public class AuthService {
         String authToken = request.getHeader("Authorization");
         final String token = authToken.substring(7);
         String username = jwtTokenUtil.getUsernameFromToken(token);
-        UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
+        User userDetails = (User) userService.loadUserByUsername(username);
 
         if (jwtTokenUtil.validateRefreshToken(token, userDetails)) {
             String accessToken = jwtTokenUtil.generateToken(userDetails);

@@ -6,12 +6,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ncti.backend.entiny.Schedule;
+import ru.ncti.backend.entiny.Student;
 import ru.ncti.backend.entiny.Teacher;
 import ru.ncti.backend.entiny.enums.WeekType;
 import ru.ncti.backend.repository.ScheduleRepository;
 import ru.ncti.backend.repository.TeacherRepository;
 import ru.ncti.backend.repository.UserRepository;
-import ru.ncti.backend.security.UserDetailsImpl;
 
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
@@ -44,9 +44,9 @@ public class TeacherService {
     @Transactional(readOnly = true)
     public Teacher getProfile() throws NotFoundException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Teacher userDetails = (Teacher) auth.getPrincipal();
         return (Teacher) userRepository
-                .findById(userDetails.getUser().getId())
+                .findById(userDetails.getId())
                 .orElseThrow(() -> {
                     log.error("Teacher not found");
                     return new NotFoundException("Teacher not found");
@@ -56,9 +56,9 @@ public class TeacherService {
     @Transactional(readOnly = true)
     public Map<String, Set<Schedule>> getSchedule() throws NotFoundException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        Teacher userDetails = (Teacher) auth.getPrincipal();
         Teacher teacher = (Teacher) userRepository
-                .findById(userDetails.getUser().getId())
+                .findById(userDetails.getId())
                 .orElseThrow(() -> {
                     log.error("Teacher not found");
                     return new NotFoundException("Teacher not found");

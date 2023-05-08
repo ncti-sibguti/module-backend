@@ -4,9 +4,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ru.ncti.backend.entiny.User;
 import ru.ncti.backend.security.JwtTokenUtil;
-import ru.ncti.backend.security.UserDetailsImpl;
-import ru.ncti.backend.security.UserDetailsServiceImpl;
+import ru.ncti.backend.service.UserService;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -18,11 +18,11 @@ import java.io.IOException;
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtTokenUtil jwtTokenUtil;
-    private final UserDetailsServiceImpl userDetailsService;
+    private final UserService userService;
 
-    public JwtRequestFilter(JwtTokenUtil jwtTokenUtil, UserDetailsServiceImpl userDetailsService) {
+    public JwtRequestFilter(JwtTokenUtil jwtTokenUtil, UserService userService) {
         this.jwtTokenUtil = jwtTokenUtil;
-        this.userDetailsService = userDetailsService;
+        this.userService = userService;
     }
 
 
@@ -40,7 +40,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid JWT Token in Bearer Header");
             } else {
                 String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
-                UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
+                User userDetails = (User) userService.loadUserByUsername(username);
 
                 if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
 
