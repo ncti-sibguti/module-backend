@@ -3,7 +3,6 @@ package ru.ncti.backend.controller;
 import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,7 +10,6 @@ import ru.ncti.backend.service.TeacherService;
 
 @RestController
 @RequestMapping("/teacher")
-@PreAuthorize(value = "hasRole('TEACHER')")
 public class TeacherController {
 
     private final TeacherService teacherService;

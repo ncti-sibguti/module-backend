@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ncti.backend.dto.AdminDTO;
-import ru.ncti.backend.dto.GroupDTO;
-import ru.ncti.backend.dto.NewsDTO;
 import ru.ncti.backend.dto.ResatPasswordDTO;
 import ru.ncti.backend.dto.ScheduleDTO;
 import ru.ncti.backend.dto.StudentDTO;
@@ -31,13 +29,11 @@ import java.io.IOException;
 @RestController
 @Log4j2
 @RequestMapping("/admin")
-@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     private final static String TEACHERS_URL = "/teachers";
     private final static String STUDENTS_URL = "/students";
     private final static String GROUPS_URL = "/groups";
-    private final static String NEWS_URL = "/news";
 
     private final AdminService adminService;
 
@@ -135,19 +131,13 @@ public class AdminController {
 
 
     @PostMapping(GROUPS_URL)
-    public ResponseEntity<?> createGroup(@RequestBody GroupDTO dto) {
+    public ResponseEntity<?> createGroup(@RequestParam("name") String name) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(adminService.addGroup(dto));
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.addGroup(name));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
         }
     }
-
-    @PostMapping(NEWS_URL)
-    public ResponseEntity<?> addNews(@RequestBody NewsDTO dto) {
-        return ResponseEntity.ok(adminService.createNews(dto));
-    }
-
 
     @PostMapping("/upload-students")
     public ResponseEntity<?> uploadStudents(@RequestParam("file") MultipartFile file) {

@@ -11,15 +11,12 @@ import ru.ncti.backend.rabbitmq.model.RabbitQueue;
 
 @Configuration
 public class RabbitConfiguration {
-
     @Bean
     public MessageConverter jsonMessage() {
         return new Jackson2JsonMessageConverter();
     }
-
     @Bean
     public Queue certificateQueue() {
         return new Queue(RabbitQueue.EMAIL_UPDATE);
     }
-
 }

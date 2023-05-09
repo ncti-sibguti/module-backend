@@ -2,7 +2,6 @@ package ru.ncti.backend.service;
 
 import javassist.NotFoundException;
 import lombok.extern.log4j.Log4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,11 +9,7 @@ import ru.ncti.backend.entiny.Group;
 import ru.ncti.backend.entiny.Schedule;
 import ru.ncti.backend.entiny.Student;
 import ru.ncti.backend.entiny.enums.WeekType;
-import ru.ncti.backend.repository.GroupRepository;
 import ru.ncti.backend.repository.ScheduleRepository;
-import ru.ncti.backend.repository.StudentRepository;
-import ru.ncti.backend.repository.TeacherRepository;
-import ru.ncti.backend.repository.UserRepository;
 
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
@@ -32,28 +27,10 @@ import java.util.stream.Collectors;
 @Log4j
 public class StudentService {
 
-    private final UserRepository userRepository;
-    private final TeacherRepository teacherRepository;
-    private final StudentRepository studentRepository;
     private final ScheduleRepository scheduleRepository;
-    private final GroupRepository groupRepository;
-    private final EmailSenderService emailSenderService;
-    private final RabbitTemplate rabbitTemplate;
 
-    public StudentService(UserRepository userRepository,
-                          TeacherRepository teacherRepository,
-                          StudentRepository studentRepository,
-                          ScheduleRepository scheduleRepository,
-                          GroupRepository groupRepository,
-                          EmailSenderService emailSenderService,
-                          RabbitTemplate rabbitTemplate) {
-        this.userRepository = userRepository;
-        this.teacherRepository = teacherRepository;
-        this.studentRepository = studentRepository;
+    public StudentService(ScheduleRepository scheduleRepository) {
         this.scheduleRepository = scheduleRepository;
-        this.groupRepository = groupRepository;
-        this.emailSenderService = emailSenderService;
-        this.rabbitTemplate = rabbitTemplate;
     }
 
     @Transactional(readOnly = true)

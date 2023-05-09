@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ncti.backend.dto.AdminDTO;
-import ru.ncti.backend.dto.GroupDTO;
-import ru.ncti.backend.dto.NewsDTO;
 import ru.ncti.backend.dto.ResatPasswordDTO;
 import ru.ncti.backend.dto.ScheduleDTO;
 import ru.ncti.backend.dto.ScheduleUploadDTO;
@@ -21,7 +19,6 @@ import ru.ncti.backend.dto.StudentDTO;
 import ru.ncti.backend.dto.TeacherDTO;
 import ru.ncti.backend.entiny.Admin;
 import ru.ncti.backend.entiny.Group;
-import ru.ncti.backend.entiny.News;
 import ru.ncti.backend.entiny.Role;
 import ru.ncti.backend.entiny.Schedule;
 import ru.ncti.backend.entiny.Student;
@@ -30,7 +27,6 @@ import ru.ncti.backend.entiny.User;
 import ru.ncti.backend.entiny.enums.WeekType;
 import ru.ncti.backend.repository.AdminRepository;
 import ru.ncti.backend.repository.GroupRepository;
-import ru.ncti.backend.repository.NewsRepository;
 import ru.ncti.backend.repository.RoleRepository;
 import ru.ncti.backend.repository.ScheduleRepository;
 import ru.ncti.backend.repository.StudentRepository;
@@ -59,7 +55,6 @@ public class AdminService {
     private final GroupRepository groupRepository;
     private final RoleRepository roleRepository;
     private final TeacherRepository teacherRepository;
-    private final NewsRepository newsRepository;
     private final AdminRepository adminRepository;
     private final ScheduleRepository scheduleRepository;
     private final UserRepository userRepository;
@@ -71,7 +66,6 @@ public class AdminService {
                         GroupRepository groupRepository,
                         RoleRepository roleRepository,
                         TeacherRepository teacherRepository,
-                        NewsRepository newsRepository,
                         AdminRepository adminRepository,
                         ScheduleRepository scheduleRepository,
                         UserRepository userRepository,
@@ -82,7 +76,6 @@ public class AdminService {
         this.groupRepository = groupRepository;
         this.roleRepository = roleRepository;
         this.teacherRepository = teacherRepository;
-        this.newsRepository = newsRepository;
         this.adminRepository = adminRepository;
         this.scheduleRepository = scheduleRepository;
         this.userRepository = userRepository;
@@ -175,22 +168,16 @@ public class AdminService {
     }
 
     @Transactional(readOnly = false)
-    public String addGroup(GroupDTO dto) throws Exception {
-        if (groupRepository.findByName(dto.getName()).isPresent()) {
-            log.error("Group" + dto.getName() + " already exist");
-            throw new Exception("Group" + dto.getName() + " already exist");
+    public String addGroup(String name) throws Exception {
+        if (groupRepository.findByName(name).isPresent()) {
+            log.error("Group" + name + " already exist");
+            throw new Exception("Group" + name + " already exist");
         }
 
-        Group group = convert(dto, Group.class);
+        Group group = new Group();
+        group.setName(name);
         groupRepository.save(group);
         return "Group was created";
-    }
-
-    @Transactional(readOnly = false)
-    public News createNews(NewsDTO dto) {
-        News news = convert(dto, News.class);
-        newsRepository.save(news);
-        return news;
     }
 
     @Transactional(readOnly = false)

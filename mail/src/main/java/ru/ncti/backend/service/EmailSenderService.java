@@ -27,7 +27,6 @@ public class EmailSenderService {
         this.templateEngine = templateEngine;
     }
 
-
     @RabbitListener(queues = EMAIL_UPDATE)
     public void sendEmail(Email email) throws MessagingException {
         MimeMessage message = emailSender.createMimeMessage();

@@ -11,7 +11,6 @@ import ru.ncti.backend.service.StudentService;
 
 @RestController
 @RequestMapping("/student")
-@PreAuthorize("hasRole('STUDENT')")
 public class StudentController {
     private final StudentService studentService;
 

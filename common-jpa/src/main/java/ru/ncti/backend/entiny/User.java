@@ -67,13 +67,17 @@ public abstract class User implements UserDetails {
     private Set<Role> roles;
 
     @JsonIgnore
-    private Boolean nonExpired = false;
+    @Column(columnDefinition = "true")
+    private Boolean nonExpired;
     @JsonIgnore
-    private Boolean nonLocked = false;
+    @Column(columnDefinition = "true")
+    private Boolean nonLocked;
     @JsonIgnore
-    private Boolean credentialsNonExpired = false;
+    @Column(columnDefinition = "true")
+    private Boolean credentialsNonExpired;
     @JsonIgnore
-    private Boolean enable = false;
+    @Column(columnDefinition = "true")
+    private Boolean enable;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -90,7 +94,7 @@ public abstract class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return nonLocked;
     }
 
     @Override
