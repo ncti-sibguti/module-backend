@@ -9,24 +9,22 @@
 </head>
 <body>
 <p>
-    Здравствуйте, <span th:text="${name}">NAME</span>!
+    Здравствуйте,
+    Вы получили приглашение в мобильное приложение КТИ.
 </p>
+<p>Для входа в приложение используйте следующие данные:</p>
 <p>
-    Вы были зарегистрированы во внутренней систему колледжа <b>Портал ГУТИ</b> от
-    <span th:text="${subscriptionDate}">28-12-2012</span>
-</p>
-<p>Для входа в приложения используйте следующие данные:-</p>
-
-<p>
-    логин: <span th:text="${email}">email</span>
+    логин: <span th:text="${login}">login</span>
 </p>
 <p>
     пароль: <span th:text="${password}">password</span>
 </p>
-
 <p>
-    Regards, <br/>
-    <em>The CodingNConcepts Team</em>
+    Файл приложения лежит в телеграм канале: https://t.me/+WOFBqHPlpqs5NDEy
+</p>
+<p>
+    С наилучшими пожеланиями, <br/>
+    <em>The Coding Team</em>
 </p>
 </body>
 </html>

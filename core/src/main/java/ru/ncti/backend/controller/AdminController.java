@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ncti.backend.dto.AdminDTO;
+import ru.ncti.backend.dto.GroupDTO;
 import ru.ncti.backend.dto.ResatPasswordDTO;
 import ru.ncti.backend.dto.ScheduleDTO;
 import ru.ncti.backend.dto.StudentDTO;
@@ -131,9 +132,9 @@ public class AdminController {
 
 
     @PostMapping(GROUPS_URL)
-    public ResponseEntity<?> createGroup(@RequestParam("name") String name) {
+    public ResponseEntity<?> createGroup(@RequestBody GroupDTO dto) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(adminService.addGroup(name));
+            return ResponseEntity.status(HttpStatus.OK).body(adminService.addGroup(dto));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
         }

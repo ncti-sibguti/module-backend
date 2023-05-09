@@ -11,7 +11,7 @@ WORKDIR /home/app
 RUN mvn clean package -DskipTests
 
 # Загрузка образа для запуска приложения
-FROM openjdk:17 AS run
+FROM openjdk:17-slim AS run
 
 # Копирование собранного jar-файла из предыдущего образа в текущий
 ARG JAR_FILE=/home/app/core/target/*.jar
@@ -23,10 +23,12 @@ WORKDIR /home/app
 ENV DB_URL=jdbc:postgresql://mypostgres:5432/ncti
 ENV DB_USER=postgres
 ENV DB_PASSWORD=root
-ENV EMAIL_USER=email
-ENV EMAIL_PASSWORD=passwd
+ENV EMAIL_USER=mail
+ENV EMAIL_PASSWORD=mail
 ENV SECRET=dSgVkYp3s6v9y$B&
 ENV RABBITMQ_HOST=172.18.0.2
+ENV RABBITMQ_USER=aa
+ENV RABBITMQ_PASSWORD=aa
 
 EXPOSE 8080
 

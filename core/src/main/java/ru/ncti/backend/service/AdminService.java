@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ncti.backend.dto.AdminDTO;
+import ru.ncti.backend.dto.GroupDTO;
 import ru.ncti.backend.dto.ResatPasswordDTO;
 import ru.ncti.backend.dto.ScheduleDTO;
 import ru.ncti.backend.dto.ScheduleUploadDTO;
@@ -25,6 +26,7 @@ import ru.ncti.backend.entiny.Student;
 import ru.ncti.backend.entiny.Teacher;
 import ru.ncti.backend.entiny.User;
 import ru.ncti.backend.entiny.enums.WeekType;
+import ru.ncti.backend.model.Email;
 import ru.ncti.backend.repository.AdminRepository;
 import ru.ncti.backend.repository.GroupRepository;
 import ru.ncti.backend.repository.RoleRepository;
@@ -38,12 +40,15 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
+import static ru.ncti.backend.rabbitmq.model.RabbitQueue.EMAIL_UPDATE;
 
 @Service
 @Log4j
@@ -121,6 +126,8 @@ public class AdminService {
         student.setUsername(username);
         studentRepository.save(student);
 
+        createEmailNotification(student, dto.getPassword());
+
         return student;
     }
 
@@ -138,7 +145,7 @@ public class AdminService {
         String username = UUID.randomUUID().toString().split("-")[0];
         teacher.setUsername(username);
         teacherRepository.save(teacher);
-
+        createEmailNotification(teacher, dto.getPassword());
         return teacher;
     }
 
@@ -168,14 +175,13 @@ public class AdminService {
     }
 
     @Transactional(readOnly = false)
-    public String addGroup(String name) throws Exception {
-        if (groupRepository.findByName(name).isPresent()) {
-            log.error("Group" + name + " already exist");
-            throw new Exception("Group" + name + " already exist");
+    public String addGroup(GroupDTO dto) throws Exception {
+        if (groupRepository.findByName(dto.getName()).isPresent()) {
+            log.error("Group" + dto.getName() + " already exist");
+            throw new Exception("Group" + dto.getName() + " already exist");
         }
 
-        Group group = new Group();
-        group.setName(name);
+        Group group = convert(dto, Group.class);
         groupRepository.save(group);
         return "Group was created";
     }
@@ -229,7 +235,6 @@ public class AdminService {
 
     @Transactional
     public String uploadSchedule(MultipartFile file) throws IOException {
-
         CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
         List<ScheduleUploadDTO> schedule = new CsvToBeanBuilder<ScheduleUploadDTO>(csvReader)
                 .withType(ScheduleUploadDTO.class).build().parse();
@@ -387,19 +392,19 @@ public class AdminService {
         return currentWeekNumber % 2 == 0 ? WeekType.EVEN : WeekType.ODD;
     }
 
-//    private void createEmailNotification(User dto, String password) {
-//        Email email = new Email();
-//        email.setTo(dto.getEmail());
-//        email.setSubject("Welcome Email from NCTI");
-//        email.setTemplate("welcome-email.html");
-//        Map<String, Object> properties = new HashMap<>();
-//        String login = dto.getUsername() == null ? dto.getEmail() : dto.getUsername();
-//        properties.put("name", dto.getFirstname());
-//        properties.put("subscriptionDate", LocalDate.now().toString());
-//        properties.put("login", login);
-//        properties.put("password", password);
-//        email.setProperties(properties);
-//
-//        rabbitTemplate.convertAndSend(EMAIL_UPDATE, email);
-//    }
+    private void createEmailNotification(User dto, String password) {
+        Email email = Email.builder()
+                .to(dto.getEmail())
+                .subject("Добро пожаловать в мобильное приложение.")
+                .template("welcome-email.html")
+                .properties(new HashMap<>() {{
+                    put("name", dto.getFirstname());
+                    put("subscriptionDate", LocalDate.now().toString());
+                    put("login", dto.getUsername());
+                    put("password", password);
+                }})
+                .build();
+
+        rabbitTemplate.convertAndSend(EMAIL_UPDATE, email);
+    }
 }

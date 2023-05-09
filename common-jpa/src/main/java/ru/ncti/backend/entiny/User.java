@@ -67,17 +67,17 @@ public abstract class User implements UserDetails {
     private Set<Role> roles;
 
     @JsonIgnore
-    @Column(columnDefinition = "true")
-    private Boolean nonExpired;
+    @Column(nullable = false)
+    private Boolean nonExpired = true;
     @JsonIgnore
-    @Column(columnDefinition = "true")
-    private Boolean nonLocked;
+    @Column(nullable = false)
+    private Boolean nonLocked = true;
     @JsonIgnore
-    @Column(columnDefinition = "true")
-    private Boolean credentialsNonExpired;
+    @Column(nullable = false)
+    private Boolean credentialsNonExpired = true;
     @JsonIgnore
-    @Column(columnDefinition = "true")
-    private Boolean enable;
+    @Column(nullable = false)
+    private Boolean enable = true;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
