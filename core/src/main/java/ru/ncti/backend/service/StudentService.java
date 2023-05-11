@@ -7,8 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ncti.backend.entiny.Group;
 import ru.ncti.backend.entiny.Schedule;
-import ru.ncti.backend.entiny.Student;
-import ru.ncti.backend.entiny.enums.WeekType;
+import ru.ncti.backend.entiny.users.Student;
 import ru.ncti.backend.repository.ScheduleRepository;
 
 import java.time.LocalDate;
@@ -64,16 +63,16 @@ public class StudentService {
 
     private Set<Schedule> getTypeSchedule(Group group) {
         List<Schedule> schedule = scheduleRepository.findAllByGroup(group);
-        WeekType currentWeekType = getCurrentWeekType();
+        int currentWeekType = getCurrentWeekType();
         return schedule.stream()
-                .filter(s -> s.getType() == WeekType.CONST || s.getType() == currentWeekType)
+                .filter(s -> s.getType() == 0 || s.getType() == currentWeekType)
                 .collect(Collectors.toSet());
     }
 
-    private WeekType getCurrentWeekType() {
+    private int getCurrentWeekType() {
         LocalDate currentDate = LocalDate.now();
         int currentWeekNumber = currentDate.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
-        return currentWeekNumber % 2 == 0 ? WeekType.EVEN : WeekType.ODD;
+        return currentWeekNumber % 2 == 0 ? 2 : 1;
     }
 
 }

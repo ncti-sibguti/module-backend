@@ -11,7 +11,7 @@ public class ScheduleDTO {
     private Long group;
     private Integer numberPair;
     private Long teacher;
-    private String subject;
+    private Long subject;
     private String classroom;
-    private String weekType;
+    private Integer weekType;
 }

@@ -5,7 +5,6 @@ import javassist.NotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +20,7 @@ import ru.ncti.backend.dto.GroupDTO;
 import ru.ncti.backend.dto.ResatPasswordDTO;
 import ru.ncti.backend.dto.ScheduleDTO;
 import ru.ncti.backend.dto.StudentDTO;
+import ru.ncti.backend.dto.SubjectDTO;
 import ru.ncti.backend.dto.TeacherDTO;
 import ru.ncti.backend.service.AdminService;
 
@@ -35,6 +35,7 @@ public class AdminController {
     private final static String TEACHERS_URL = "/teachers";
     private final static String STUDENTS_URL = "/students";
     private final static String GROUPS_URL = "/groups";
+    private final static String SUBJECT_URL = "/subjects";
 
     private final AdminService adminService;
 
@@ -104,6 +105,11 @@ public class AdminController {
         }
     }
 
+    @GetMapping(SUBJECT_URL)
+    public ResponseEntity<?> getSubjecst() {
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.getSubjects());
+    }
+
     @PostMapping(STUDENTS_URL)
     public ResponseEntity<?> createStudent(@Valid @RequestBody StudentDTO dto) {
         try {
@@ -138,6 +144,11 @@ public class AdminController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
         }
+    }
+
+    @PostMapping(SUBJECT_URL)
+    public ResponseEntity<?> addSubject(@RequestBody SubjectDTO dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.addSubject(dto));
     }
 
     @PostMapping("/upload-students")

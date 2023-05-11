@@ -1,7 +1,9 @@
-package ru.ncti.backend.entiny;
+package ru.ncti.backend.entiny.users;
 
 import lombok.Getter;
 import lombok.Setter;
+import ru.ncti.backend.entiny.Group;
+import ru.ncti.backend.entiny.User;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;

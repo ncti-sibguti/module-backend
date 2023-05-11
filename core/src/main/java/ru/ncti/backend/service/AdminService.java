@@ -17,21 +17,23 @@ import ru.ncti.backend.dto.ResatPasswordDTO;
 import ru.ncti.backend.dto.ScheduleDTO;
 import ru.ncti.backend.dto.ScheduleUploadDTO;
 import ru.ncti.backend.dto.StudentDTO;
+import ru.ncti.backend.dto.SubjectDTO;
 import ru.ncti.backend.dto.TeacherDTO;
-import ru.ncti.backend.entiny.Admin;
 import ru.ncti.backend.entiny.Group;
 import ru.ncti.backend.entiny.Role;
 import ru.ncti.backend.entiny.Schedule;
-import ru.ncti.backend.entiny.Student;
-import ru.ncti.backend.entiny.Teacher;
+import ru.ncti.backend.entiny.Subject;
 import ru.ncti.backend.entiny.User;
-import ru.ncti.backend.entiny.enums.WeekType;
+import ru.ncti.backend.entiny.users.Admin;
+import ru.ncti.backend.entiny.users.Student;
+import ru.ncti.backend.entiny.users.Teacher;
 import ru.ncti.backend.model.Email;
 import ru.ncti.backend.repository.AdminRepository;
 import ru.ncti.backend.repository.GroupRepository;
 import ru.ncti.backend.repository.RoleRepository;
 import ru.ncti.backend.repository.ScheduleRepository;
 import ru.ncti.backend.repository.StudentRepository;
+import ru.ncti.backend.repository.SubjectRepository;
 import ru.ncti.backend.repository.TeacherRepository;
 import ru.ncti.backend.repository.UserRepository;
 
@@ -64,6 +66,7 @@ public class AdminService {
     private final ScheduleRepository scheduleRepository;
     private final UserRepository userRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final SubjectRepository subjectRepository;
 
     public AdminService(StudentRepository studentRepository,
                         ModelMapper modelMapper,
@@ -74,7 +77,8 @@ public class AdminService {
                         AdminRepository adminRepository,
                         ScheduleRepository scheduleRepository,
                         UserRepository userRepository,
-                        RabbitTemplate rabbitTemplate) {
+                        RabbitTemplate rabbitTemplate,
+                        SubjectRepository subjectRepository) {
         this.studentRepository = studentRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
@@ -85,6 +89,7 @@ public class AdminService {
         this.scheduleRepository = scheduleRepository;
         this.userRepository = userRepository;
         this.rabbitTemplate = rabbitTemplate;
+        this.subjectRepository = subjectRepository;
     }
 
     @Transactional(readOnly = true)
@@ -126,7 +131,7 @@ public class AdminService {
         student.setUsername(username);
         studentRepository.save(student);
 
-        createEmailNotification(student, dto.getPassword());
+//        createEmailNotification(student, dto.getPassword());
 
         return student;
     }
@@ -145,7 +150,9 @@ public class AdminService {
         String username = UUID.randomUUID().toString().split("-")[0];
         teacher.setUsername(username);
         teacherRepository.save(teacher);
-        createEmailNotification(teacher, dto.getPassword());
+
+//        createEmailNotification(teacher, dto.getPassword());
+
         return teacher;
     }
 
@@ -154,14 +161,15 @@ public class AdminService {
     public String createSchedule(ScheduleDTO dto) {
         Group g = groupRepository.getById(dto.getGroup());
         Teacher teacher = teacherRepository.getById(dto.getTeacher());
-        WeekType weekType = weekType(dto.getWeekType());
+        Subject subject = subjectRepository.getById(dto.getSubject());
+        int weekType = dto.getWeekType();
 
         Schedule schedule = Schedule.builder()
                 .day(dto.getDay())
                 .group(g)
                 .numberPair(dto.getNumberPair())
                 .teacher(teacher)
-                .subject(dto.getSubject())
+                .subject(subject)
                 .classroom(dto.getClassroom())
                 .type(weekType)
                 .build();
@@ -256,7 +264,7 @@ public class AdminService {
                     Schedule sch = convert(s, Schedule.class);
                     sch.setGroup(g);
                     sch.setTeacher(t);
-                    sch.setType(weekType(s.getWeekType()));
+                    sch.setType(s.getWeekType());
                     scheduleRepository.save(sch);
                 })).toList();
 
@@ -304,7 +312,6 @@ public class AdminService {
             log.error("Group with id " + id + " not found");
             return new NotFoundException("Teacher with id + " + id + " not found");
         });
-
         g.setSchedule(getTypeSchedule(g));
 
         return g;
@@ -356,40 +363,33 @@ public class AdminService {
         return "Password update";
     }
 
+
+    @Transactional(readOnly = false)
+    public Subject addSubject(SubjectDTO dto) {
+        return subjectRepository.save(convert(dto, Subject.class));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Subject> getSubjects() {
+        return subjectRepository.findAll();
+    }
+
     private <S, D> D convert(S source, Class<D> dClass) {
         return modelMapper.map(source, dClass);
     }
 
-
-    private WeekType weekType(String type) {
-        switch (type.trim()) {
-            case "odd" -> {
-                return WeekType.ODD;
-            }
-            case "even" -> {
-                return WeekType.EVEN;
-            }
-            case "const" -> {
-                return WeekType.CONST;
-            }
-            default -> {
-                return null;
-            }
-        }
-    }
-
     private Set<Schedule> getTypeSchedule(Group group) {
         List<Schedule> schedule = scheduleRepository.findAllByGroup(group);
-        WeekType currentWeekType = getCurrentWeekType();
+        int currentWeekType = getCurrentWeekType();
         return schedule.stream()
-                .filter(s -> s.getType() == WeekType.CONST || s.getType() == currentWeekType)
+                .filter(s -> s.getType() == 0 || s.getType() == currentWeekType)
                 .collect(Collectors.toSet());
     }
 
-    private WeekType getCurrentWeekType() {
+    private int getCurrentWeekType() {
         LocalDate currentDate = LocalDate.now();
         int currentWeekNumber = currentDate.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
-        return currentWeekNumber % 2 == 0 ? WeekType.EVEN : WeekType.ODD;
+        return currentWeekNumber % 2 == 0 ? 2 : 1;
     }
 
     private void createEmailNotification(User dto, String password) {

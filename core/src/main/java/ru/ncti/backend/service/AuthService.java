@@ -11,7 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ncti.backend.dto.AdminDTO;
-import ru.ncti.backend.entiny.Admin;
+import ru.ncti.backend.entiny.users.Admin;
 import ru.ncti.backend.entiny.Role;
 import ru.ncti.backend.entiny.User;
 import ru.ncti.backend.repository.RoleRepository;

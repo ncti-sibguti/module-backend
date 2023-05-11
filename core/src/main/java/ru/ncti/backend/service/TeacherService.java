@@ -7,8 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ncti.backend.dto.TeacherScheduleDTO;
 import ru.ncti.backend.entiny.Schedule;
-import ru.ncti.backend.entiny.Teacher;
-import ru.ncti.backend.entiny.enums.WeekType;
+import ru.ncti.backend.entiny.users.Teacher;
 import ru.ncti.backend.repository.ScheduleRepository;
 import ru.ncti.backend.repository.TeacherRepository;
 
@@ -62,7 +61,7 @@ public class TeacherService {
                     .classroom(s.getClassroom())
                     .groups(List.of(s.getGroup().getName()))
                     .numberPair(s.getNumberPair())
-                    .subject(s.getSubject())
+                    .subject(s.getSubject().getName())
                     .build();
 
 // Проверяем наличие предмета с таким же номером пары и названием предмета
@@ -99,16 +98,16 @@ public class TeacherService {
     }
 
     private Set<Schedule> getTypeSchedule(List<Schedule> list) {
-        WeekType currentWeekType = getCurrentWeekType();
+        int currentWeekType = getCurrentWeekType();
         return list.stream()
-                .filter(s -> s.getType() == WeekType.CONST || s.getType() == currentWeekType)
+                .filter(s -> s.getType() == 0 || s.getType() == currentWeekType)
                 .collect(Collectors.toSet());
     }
 
-    private WeekType getCurrentWeekType() {
+    private int getCurrentWeekType() {
         LocalDate currentDate = LocalDate.now();
         int currentWeekNumber = currentDate.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
-        return currentWeekNumber % 2 == 0 ? WeekType.EVEN : WeekType.ODD;
+        return currentWeekNumber % 2 == 0 ? 2 : 1;
     }
 
 }

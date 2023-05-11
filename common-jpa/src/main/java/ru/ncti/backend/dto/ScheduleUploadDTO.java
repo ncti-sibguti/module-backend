@@ -11,6 +11,6 @@ public class ScheduleUploadDTO {
     private String subject;
     private String teacher;
     private Integer numberPair;
-    private String weekType;
+    private Integer weekType;
     private String classroom;
 }

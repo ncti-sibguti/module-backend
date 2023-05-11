@@ -6,12 +6,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.ncti.backend.entiny.enums.WeekType;
+import ru.ncti.backend.entiny.users.Teacher;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -45,13 +43,13 @@ public class Schedule {
     @JoinColumn(name = "teacher_id")
     private Teacher teacher;
 
+    @ManyToOne
     @JoinColumn(name = "subject_id")
-    private String subject;
+    private Subject subject;
 
     @Column(name = "classroom")
     private String classroom;
 
     @Column(name = "week_type")
-    @Enumerated(value = EnumType.STRING)
-    private WeekType type;
+    private Integer type;
 }

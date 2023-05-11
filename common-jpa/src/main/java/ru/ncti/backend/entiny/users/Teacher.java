@@ -1,8 +1,10 @@
-package ru.ncti.backend.entiny;
+package ru.ncti.backend.entiny.users;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import ru.ncti.backend.entiny.Schedule;
+import ru.ncti.backend.entiny.User;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
