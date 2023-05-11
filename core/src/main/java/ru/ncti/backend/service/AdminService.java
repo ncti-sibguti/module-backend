@@ -262,9 +262,11 @@ public class AdminService {
                             });
 
                     Schedule sch = convert(s, Schedule.class);
+                    Subject subject = subjectRepository.findByName(s.getSubject()).orElse(null);
                     sch.setGroup(g);
                     sch.setTeacher(t);
                     sch.setType(s.getWeekType());
+                    sch.setSubject(subject);
                     scheduleRepository.save(sch);
                 })).toList();
 

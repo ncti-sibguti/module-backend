@@ -6,6 +6,7 @@ import lombok.Setter;
 import ru.ncti.backend.entiny.Schedule;
 import ru.ncti.backend.entiny.User;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
@@ -16,7 +17,7 @@ import java.util.List;
 @Entity
 public class Teacher extends User {
 
-    @OneToMany(mappedBy = "teacher", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "teacher", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Schedule> schedules;
 }
