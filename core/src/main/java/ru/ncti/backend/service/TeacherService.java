@@ -56,6 +56,7 @@ public class TeacherService {
         Map<String, Set<TeacherScheduleDTO>> map = new HashMap<>();
 
         for (Schedule s : getTypeSchedule(list)) {
+            log.info(s.getSubject().getName());
             String key = s.getDay();
             TeacherScheduleDTO dto = TeacherScheduleDTO.builder()
                     .classroom(s.getClassroom())

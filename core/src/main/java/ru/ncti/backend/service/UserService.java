@@ -5,15 +5,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ncti.backend.entiny.Role;
-import ru.ncti.backend.entiny.User;
+import ru.ncti.backend.dto.UserDTO;
 import ru.ncti.backend.repository.RoleRepository;
 import ru.ncti.backend.repository.UserRepository;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -33,27 +30,40 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional(readOnly = true)
-    public List<User> getUsers(String type) {
-        if (type != null) {
-            switch (type) {
-                case "student" -> {
-                    Optional<Role> role = roleRepository.findByName("ROLE_STUDENT");
-                    if (role.isPresent())
-                        return userRepository.findAllByRolesIn(Set.of(role.get()));
-                    else
-                        return Collections.emptyList();
-                }
-                case "teacher" -> {
-                    Optional<Role> role = roleRepository.findByName("ROLE_TEACHER");
-                    if (role.isPresent())
-                        return userRepository.findAllByRolesIn(Set.of(role.get()));
-                    else
-                        return Collections.emptyList();
-                }
-            }
+    public List<UserDTO> getUsers(String type) {
+//        if (type != null) {
+//            switch (type) {
+//                case "student" -> {
+//                    Optional<Role> role = roleRepository.findByName("ROLE_STUDENT");
+//                    if (role.isPresent())
+//                        return userRepository.findAllByRolesIn(Set.of(role.get()));
+//                    else
+//                        return Collections.emptyList();
+//                }
+//                case "teacher" -> {
+//                    Optional<Role> role = roleRepository.findByName("ROLE_TEACHER");
+//                    if (role.isPresent())
+//                        return userRepository.findAllByRolesIn(Set.of(role.get()));
+//                    else
+//                        return Collections.emptyList();
+//                }
+//            }
+//
+//        }
 
-        }
+        List<UserDTO> users = new ArrayList<>();
 
-        return userRepository.findAll();
+        userRepository.findAll().forEach(user -> {
+            users.add(UserDTO.builder()
+                    .id(user.getId())
+                    .firstname(user.getFirstname())
+                    .lastname(user.getLastname())
+                    .surname(user.getSurname())
+                    .email(user.getEmail())
+                    .username(user.getUsername())
+                    .build());
+        });
+
+        return users;
     }
 }
