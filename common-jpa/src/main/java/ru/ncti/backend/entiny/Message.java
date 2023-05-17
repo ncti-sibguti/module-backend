@@ -6,6 +6,7 @@ import lombok.Setter;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -31,7 +32,7 @@ public class Message {
     @ManyToOne(targetEntity = User.class, cascade = {CascadeType.ALL})
     private User sender;
 
-    @ManyToOne(targetEntity = Chat.class, cascade = {CascadeType.ALL})
+    @ManyToOne(targetEntity = Chat.class, cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
     private Chat chat;
 
     @Column(name = "createdAt")

@@ -1,7 +1,6 @@
 package ru.ncti.backend.controller;
 
 import com.opencsv.exceptions.CsvException;
-import javassist.NotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,11 +49,7 @@ public class AdminController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updatePasswordForAdminById(@PathVariable("id") Long id, @RequestBody AdminDTO dto) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(adminService.updatePasswordForAdminById(id, dto));
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.updatePasswordForAdminById(id, dto));
     }
 
 
@@ -65,29 +60,17 @@ public class AdminController {
 
     @GetMapping(TEACHERS_URL + "/{id}")
     public ResponseEntity<?> getTeacherById(@PathVariable("id") Long id) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(adminService.getTeacherById(id));
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.getTeacherById(id));
     }
 
     @GetMapping(STUDENTS_URL)
     public ResponseEntity<?> getStudents(@RequestParam("group") Long group) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(adminService.getStudents(group));
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.getStudents(group));
     }
 
     @GetMapping(STUDENTS_URL + "/{id}")
     public ResponseEntity<?> getStudentById(@PathVariable("id") Long id) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(adminService.getStudentById(id));
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.getStudentById(id));
     }
 
     @GetMapping(GROUPS_URL)
@@ -98,11 +81,7 @@ public class AdminController {
 
     @GetMapping(GROUPS_URL + "/{id}")
     public ResponseEntity<?> getGroupById(@PathVariable("id") Long id) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(adminService.getGroupById(id));
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.getGroupById(id));
     }
 
     @GetMapping(SUBJECT_URL)
@@ -112,22 +91,12 @@ public class AdminController {
 
     @PostMapping(STUDENTS_URL)
     public ResponseEntity<?> createStudent(@Valid @RequestBody StudentDTO dto) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(adminService.createStudent(dto));
-        } catch (NotFoundException e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.createStudent(dto));
     }
 
     @PostMapping(TEACHERS_URL)
     public ResponseEntity<?> createTeacher(@Valid @RequestBody TeacherDTO dto) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(adminService.createTeacher(dto));
-        } catch (NotFoundException e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.createTeacher(dto));
     }
 
 
@@ -165,7 +134,7 @@ public class AdminController {
     public ResponseEntity<?> uploadTeacher(@RequestParam("file") MultipartFile file) {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(adminService.uploadTeacher(file));
-        } catch (IOException | CsvException | NotFoundException e) {
+        } catch (IOException | CsvException e) {
             log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
@@ -176,44 +145,29 @@ public class AdminController {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(adminService.uploadSchedule(file));
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
     @PutMapping("/reset")
     public ResponseEntity<?> resetPassword(@RequestBody ResatPasswordDTO dto) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(adminService.resetPasswordForUserById(dto));
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.resetPasswordForUserById(dto));
     }
 
     @DeleteMapping(TEACHERS_URL + "/{id}")
     public ResponseEntity<?> deleteTeacherById(@PathVariable("id") Long id) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(adminService.deleteTeacherById(id));
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.deleteTeacherById(id));
     }
 
     @DeleteMapping(STUDENTS_URL + "/{id}")
     public ResponseEntity<?> deleteStudentById(@PathVariable("id") Long id) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(adminService.deleteStudentById(id));
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.deleteStudentById(id));
     }
 
     @DeleteMapping(GROUPS_URL + "/{id}")
     public ResponseEntity<?> deleteGroupById(@PathVariable("id") Long id) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(adminService.deleteGroupById(id));
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.deleteGroupById(id));
     }
 
 }

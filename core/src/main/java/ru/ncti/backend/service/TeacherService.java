@@ -1,6 +1,5 @@
 package ru.ncti.backend.service;
 
-import javassist.NotFoundException;
 import lombok.extern.log4j.Log4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -40,13 +39,13 @@ public class TeacherService {
     }
 
     @Transactional(readOnly = true)
-    public Teacher getProfile() throws NotFoundException {
+    public Teacher getProfile() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         return (Teacher) auth.getPrincipal();
     }
 
     @Transactional(readOnly = true)
-    public Map<String, Set<TeacherScheduleDTO>> getSchedule() throws NotFoundException {
+    public Map<String, Set<TeacherScheduleDTO>> getSchedule() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         Teacher teacher = (Teacher) auth.getPrincipal();
         return makeSchedule(teacher.getSchedules());

@@ -1,6 +1,5 @@
 package ru.ncti.backend.controller;
 
-import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,20 +19,12 @@ public class TeacherController {
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile() {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(teacherService.getProfile());
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(teacherService.getProfile());
     }
 
     @GetMapping("/schedule")
     public ResponseEntity<?> getSchedule() {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(teacherService.getSchedule());
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(teacherService.getSchedule());
     }
 
 }

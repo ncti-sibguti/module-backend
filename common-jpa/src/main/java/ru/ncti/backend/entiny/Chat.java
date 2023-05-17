@@ -29,7 +29,7 @@ public class Chat {
     @Column(name = "name")
     private String name;
 
-    @OneToMany
+    @OneToMany(mappedBy = "chat")
     List<Message> messages;
 
     @ManyToMany

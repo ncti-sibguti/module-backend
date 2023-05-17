@@ -3,10 +3,10 @@ package ru.ncti.backend.service;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.exceptions.CsvValidationException;
-import javassist.NotFoundException;
 import lombok.extern.log4j.Log4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -99,10 +99,10 @@ public class AdminService {
     }
 
     @Transactional(readOnly = false)
-    public Admin updatePasswordForAdminById(Long id, AdminDTO dto) throws NotFoundException {
+    public Admin updatePasswordForAdminById(Long id, AdminDTO dto) {
         Admin admin = adminRepository.findById(id).orElseThrow(() -> {
             log.error("Admin with id " + id + " not found");
-            return new NotFoundException("Admin with id " + id + " not found");
+            return new UsernameNotFoundException("Admin with id " + id + " not found");
         });
         admin.setPassword(passwordEncoder.encode(dto.getPassword()));
         adminRepository.save(admin);
@@ -110,18 +110,18 @@ public class AdminService {
     }
 
     @Transactional(readOnly = false)
-    public Student createStudent(StudentDTO dto) throws NotFoundException {
+    public Student createStudent(StudentDTO dto) {
         Student student = convert(dto, Student.class);
 
         Role role = roleRepository.findByName("ROLE_STUDENT")
                 .orElseThrow(() -> {
                     log.error("ROLE_STUDENT not found");
-                    return new NotFoundException("ROLE_STUDENT not found");
+                    return new UsernameNotFoundException("ROLE_STUDENT not found");
                 });
         Group group = groupRepository.findByName(dto.getGroup())
                 .orElseThrow(() -> {
                     log.error("Group " + dto.getGroup() + " not found");
-                    return new NotFoundException("Group not found");
+                    return new UsernameNotFoundException("Group not found");
                 });
         student.setGroup(group);
         student.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -137,12 +137,12 @@ public class AdminService {
     }
 
     @Transactional(readOnly = false)
-    public Teacher createTeacher(TeacherDTO dto) throws NotFoundException {
+    public Teacher createTeacher(TeacherDTO dto) {
         Teacher teacher = convert(dto, Teacher.class);
         Role role = roleRepository.findByName("ROLE_TEACHER")
                 .orElseThrow(() -> {
                     log.error("ROLE_TEACHER not found");
-                    return new NotFoundException("ROLE_TEACHER not found");
+                    return new UsernameNotFoundException("ROLE_TEACHER not found");
                 });
         teacher.setRoles(Set.of(role));
         teacher.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -204,7 +204,7 @@ public class AdminService {
                 .map(student -> CompletableFuture.runAsync(() -> {
                     try {
                         createStudent(student);
-                    } catch (NotFoundException e) {
+                    } catch (UsernameNotFoundException e) {
                         log.error(e);
                         throw new RuntimeException(e);
                     }
@@ -218,7 +218,7 @@ public class AdminService {
     }
 
     @Transactional
-    public String uploadTeacher(MultipartFile file) throws IOException, CsvValidationException, NotFoundException {
+    public String uploadTeacher(MultipartFile file) throws IOException, CsvValidationException {
         CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
         List<TeacherDTO> teachers = new CsvToBeanBuilder<TeacherDTO>(csvReader)
                 .withType(TeacherDTO.class).build().parse();
@@ -227,7 +227,7 @@ public class AdminService {
                 .map(teacher -> CompletableFuture.runAsync(() -> {
                     try {
                         createTeacher(teacher);
-                    } catch (NotFoundException e) {
+                    } catch (UsernameNotFoundException e) {
                         throw new RuntimeException(e);
                     }
                 }))
@@ -279,10 +279,10 @@ public class AdminService {
     }
 
     @Transactional(readOnly = true)
-    public List<Student> getStudents(Long group) throws NotFoundException {
+    public List<Student> getStudents(Long group) {
         Group g = groupRepository.findById(group).orElseThrow(() -> {
             log.error("Group with id " + group + " not found");
-            return new NotFoundException("Group with id " + group + " not found");
+            return new UsernameNotFoundException("Group with id " + group + " not found");
         });
         return studentRepository.findAllByGroupOrderByLastname(g);
     }
@@ -293,26 +293,26 @@ public class AdminService {
     }
 
     @Transactional(readOnly = true)
-    public Teacher getTeacherById(Long id) throws NotFoundException {
+    public Teacher getTeacherById(Long id) {
         return teacherRepository.findById(id).orElseThrow(() -> {
             log.error("Teacher with id " + id + " not found");
-            return new NotFoundException("Teacher with id + " + id + " not found");
+            return new UsernameNotFoundException("Teacher with id + " + id + " not found");
         });
     }
 
     @Transactional(readOnly = true)
-    public Student getStudentById(Long id) throws NotFoundException {
+    public Student getStudentById(Long id) {
         return studentRepository.findById(id).orElseThrow(() -> {
             log.error("Student with id " + id + " not found");
-            return new NotFoundException("Student with id + " + id + " not found");
+            return new UsernameNotFoundException("Student with id + " + id + " not found");
         });
     }
 
     @Transactional(readOnly = true)
-    public Group getGroupById(Long id) throws NotFoundException {
+    public Group getGroupById(Long id) {
         Group g = groupRepository.findById(id).orElseThrow(() -> {
             log.error("Group with id " + id + " not found");
-            return new NotFoundException("Teacher with id + " + id + " not found");
+            return new UsernameNotFoundException("Teacher with id + " + id + " not found");
         });
         g.setSchedule(getTypeSchedule(g));
 
@@ -320,7 +320,7 @@ public class AdminService {
     }
 
     @Transactional(readOnly = false)
-    public String deleteStudentById(Long id) throws NotFoundException {
+    public String deleteStudentById(Long id) {
         Student student = studentRepository.getById(id);
 
         student.getRoles().forEach(r -> r.getUsers().remove(student));
@@ -332,7 +332,7 @@ public class AdminService {
     }
 
     @Transactional(readOnly = false)
-    public String deleteTeacherById(Long id) throws NotFoundException {
+    public String deleteTeacherById(Long id) {
         Teacher teacher = teacherRepository.getById(id);
 
         teacher.getRoles().forEach(r -> r.getUsers().remove(teacher));
@@ -344,21 +344,21 @@ public class AdminService {
     }
 
     @Transactional(readOnly = false)
-    public String deleteGroupById(Long id) throws NotFoundException {
+    public String deleteGroupById(Long id) {
         Group group = groupRepository.findById(id).orElseThrow(() -> {
             log.error("Group with id " + id + " not found");
-            return new NotFoundException("Group with id + " + id + " not found");
+            return new UsernameNotFoundException("Group with id + " + id + " not found");
         });
         groupRepository.delete(group);
         return "Group successfully deleted";
     }
 
     @Transactional(readOnly = false)
-    public String resetPasswordForUserById(ResatPasswordDTO dto) throws NotFoundException {
+    public String resetPasswordForUserById(ResatPasswordDTO dto) {
         //todo: add send email with changed password
         User candidate = userRepository.findById(dto.getId()).orElseThrow(() -> {
             log.error("User with id " + dto.getPassword() + "not found");
-            return new NotFoundException("User with id " + dto.getPassword() + "not found");
+            return new UsernameNotFoundException("User with id " + dto.getPassword() + "not found");
         });
         candidate.setPassword(passwordEncoder.encode(dto.getPassword()));
         userRepository.save(candidate);
