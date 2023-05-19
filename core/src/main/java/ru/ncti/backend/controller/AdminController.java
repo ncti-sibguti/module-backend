@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.ncti.backend.dto.AdminDTO;
 import ru.ncti.backend.dto.GroupDTO;
 import ru.ncti.backend.dto.ResatPasswordDTO;
-import ru.ncti.backend.dto.ScheduleDTO;
+import ru.ncti.backend.dto.SampleDTO;
 import ru.ncti.backend.dto.StudentDTO;
 import ru.ncti.backend.dto.SubjectDTO;
 import ru.ncti.backend.dto.TeacherDTO;
@@ -101,7 +101,7 @@ public class AdminController {
 
 
     @PostMapping("/schedule")
-    public ResponseEntity<?> createSchedule(@RequestBody ScheduleDTO dto) {
+    public ResponseEntity<?> createSchedule(@RequestBody SampleDTO dto) {
         return ResponseEntity.status(HttpStatus.OK).body(adminService.createSchedule(dto));
     }
 

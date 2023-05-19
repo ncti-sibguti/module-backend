@@ -19,11 +19,12 @@ public class JwtTokenUtil {
     private final Long refreshExpirationInMs = 1209600000L; // 14 days
 
     public String generateToken(User userDetails) {
-        Map<String, Object> claims = new HashMap<>() {{
-            put("user_id", userDetails.getId());
-            put("role", userDetails.getAuthorities());
-        }};
-        String subject = userDetails.getUsername() == null ? userDetails.getEmail() : userDetails.getUsername();
+        Map<String, Object> claims = new HashMap<>();
+
+        claims.put("user_id", userDetails.getId());
+        claims.put("role", userDetails.getAuthorities());
+
+        String subject = userDetails.getUsername();
         return Jwts.builder().setClaims(claims)
                 .setSubject(subject)
                 .setIssuer("ncti-backend")
@@ -34,7 +35,7 @@ public class JwtTokenUtil {
 
     public String generateRefreshToken(User userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        String subject = userDetails.getUsername() == null ? userDetails.getEmail() : userDetails.getUsername();
+        String subject = userDetails.getUsername();
         return Jwts.builder().setClaims(claims)
                 .setSubject(subject)
                 .setIssuer("ncti-backend")
@@ -45,7 +46,7 @@ public class JwtTokenUtil {
 
     public Boolean validateToken(String token, User userDetails) {
         final String username = getUsernameFromToken(token);
-        String usernameOrEmail = userDetails.getUsername() == null ? userDetails.getEmail() : userDetails.getUsername();
+        String usernameOrEmail = userDetails.getUsername();
         return (username.equals(usernameOrEmail) && !isTokenExpired(token));
     }
 
@@ -64,7 +65,7 @@ public class JwtTokenUtil {
 
     public boolean validateRefreshToken(String refreshToken, User userDetails) {
         final String username = getUsernameFromToken(refreshToken);
-        String usernameOrEmail = userDetails.getUsername() == null ? userDetails.getEmail() : userDetails.getUsername();
+        String usernameOrEmail = userDetails.getUsername();
         return (username.equals(usernameOrEmail) && !isRefreshTokenExpired(refreshToken));
     }
 

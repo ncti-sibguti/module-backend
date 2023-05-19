@@ -5,9 +5,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ncti.backend.entiny.Group;
-import ru.ncti.backend.entiny.Schedule;
+import ru.ncti.backend.entiny.Sample;
 import ru.ncti.backend.entiny.users.Student;
-import ru.ncti.backend.repository.ScheduleRepository;
+import ru.ncti.backend.repository.SampleRepository;
 
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
@@ -25,10 +25,10 @@ import java.util.stream.Collectors;
 @Log4j
 public class StudentService {
 
-    private final ScheduleRepository scheduleRepository;
+    private final SampleRepository sampleRepository;
 
-    public StudentService(ScheduleRepository scheduleRepository) {
-        this.scheduleRepository = scheduleRepository;
+    public StudentService(SampleRepository sampleRepository) {
+        this.sampleRepository = sampleRepository;
     }
 
     @Transactional(readOnly = true)
@@ -38,21 +38,21 @@ public class StudentService {
     }
 
     @Transactional(readOnly = true)
-    public Map<String, Set<Schedule>> getSchedule() {
+    public Map<String, Set<Sample>> getSchedule() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         Student student = (Student) auth.getPrincipal();
 
-        Map<String, Set<Schedule>> map = new HashMap<>();
+        Map<String, Set<Sample>> map = new HashMap<>();
 
-        Set<Schedule> currSchedule = getTypeSchedule(student.getGroup());
+        Set<Sample> currSample = getTypeSchedule(student.getGroup());
 
-        for (Schedule s : currSchedule) {
+        for (Sample s : currSample) {
             map.computeIfAbsent(s.getDay(), k -> new HashSet<>()).add(s);
         }
 
         map.forEach((key, value) -> {
-            Set<Schedule> sortedSet = value.stream()
-                    .sorted(Comparator.comparingInt(Schedule::getNumberPair))
+            Set<Sample> sortedSet = value.stream()
+                    .sorted(Comparator.comparingInt(Sample::getNumberPair))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
             map.put(key, sortedSet);
         });
@@ -60,18 +60,18 @@ public class StudentService {
         return map;
     }
 
-    private Set<Schedule> getTypeSchedule(Group group) {
-        List<Schedule> schedule = scheduleRepository.findAllByGroup(group);
-        int currentWeekType = getCurrentWeekType();
-        return schedule.stream()
-                .filter(s -> s.getType() == 0 || s.getType() == currentWeekType)
+    private Set<Sample> getTypeSchedule(Group group) {
+        List<Sample> sample = sampleRepository.findAllByGroup(group);
+        String currentWeekType = getCurrentWeekType();
+        return sample.stream()
+                .filter(s -> s.getParity().equals("0") || s.getParity().equals(currentWeekType))
                 .collect(Collectors.toSet());
     }
 
-    private int getCurrentWeekType() {
+    private String getCurrentWeekType() {
         LocalDate currentDate = LocalDate.now();
         int currentWeekNumber = currentDate.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
-        return currentWeekNumber % 2 == 0 ? 2 : 1;
+        return currentWeekNumber % 2 == 0 ? "2" : "1";
     }
 
 }

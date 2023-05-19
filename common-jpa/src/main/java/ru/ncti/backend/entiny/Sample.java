@@ -21,36 +21,40 @@ import javax.persistence.Table;
 @Getter
 @Setter
 @Entity
-@Table(name = "schedule")
+@Table(name = "shablon")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Schedule {
+public class Sample {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String day;
-
     @ManyToOne
     @JsonIgnore
-    @JoinColumn(name = "group_id")
+    @JoinColumn(name = "id_group")
     private Group group;
 
-    @Column(name = "number_pair")
-    private Integer numberPair;
+    @Column(name = "day_week")
+    private String day;
 
-    @ManyToOne
-    @JoinColumn(name = "teacher_id")
-    private Teacher teacher;
+    @Column(name = "week_parity")
+    private String parity;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "subject_id")
     private Subject subject;
 
+    @Column(name = "subject_number")
+    private Integer numberPair;
+
+    @Column(name = "subgroup")
+    private Integer subgroup;
+
+    @ManyToOne
+    @JoinColumn(name = "teacher_id")
+    private Teacher teacher;
+
     @Column(name = "classroom")
     private String classroom;
-
-    @Column(name = "week_type")
-    private Integer type;
 }

@@ -9,6 +9,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.Set;
@@ -21,11 +23,19 @@ public class Group {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_gr")
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_spec")
+    private Speciality speciality;
+
+    @Column(name = "name_gr", nullable = false)
     private String name;
 
+    @Column(name = "course")
+    private Integer course;
+
     @OneToMany(mappedBy = "group", fetch = FetchType.EAGER)
-    private Set<Schedule> schedule;
+    private Set<Sample> sample;
 }

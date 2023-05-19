@@ -5,9 +5,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ncti.backend.dto.TeacherScheduleDTO;
-import ru.ncti.backend.entiny.Schedule;
+import ru.ncti.backend.entiny.Sample;
 import ru.ncti.backend.entiny.users.Teacher;
-import ru.ncti.backend.repository.ScheduleRepository;
+import ru.ncti.backend.repository.SampleRepository;
 import ru.ncti.backend.repository.TeacherRepository;
 
 import java.time.LocalDate;
@@ -30,12 +30,12 @@ import java.util.stream.Collectors;
 public class TeacherService {
 
     private final TeacherRepository teacherRepository;
-    private final ScheduleRepository scheduleRepository;
+    private final SampleRepository sampleRepository;
 
     public TeacherService(TeacherRepository teacherRepository,
-                          ScheduleRepository scheduleRepository) {
+                          SampleRepository sampleRepository) {
         this.teacherRepository = teacherRepository;
-        this.scheduleRepository = scheduleRepository;
+        this.sampleRepository = sampleRepository;
     }
 
     @Transactional(readOnly = true)
@@ -48,13 +48,13 @@ public class TeacherService {
     public Map<String, Set<TeacherScheduleDTO>> getSchedule() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         Teacher teacher = (Teacher) auth.getPrincipal();
-        return makeSchedule(teacher.getSchedules());
+        return makeSchedule(teacher.getSamples());
     }
 
-    private Map<String, Set<TeacherScheduleDTO>> makeSchedule(List<Schedule> list) {
+    private Map<String, Set<TeacherScheduleDTO>> makeSchedule(List<Sample> list) {
         Map<String, Set<TeacherScheduleDTO>> map = new HashMap<>();
 
-        for (Schedule s : getTypeSchedule(list)) {
+        for (Sample s : getTypeSchedule(list)) {
             log.info(s.getSubject().getName());
             String key = s.getDay();
             TeacherScheduleDTO dto = TeacherScheduleDTO.builder()
@@ -97,17 +97,17 @@ public class TeacherService {
         });
     }
 
-    private Set<Schedule> getTypeSchedule(List<Schedule> list) {
-        int currentWeekType = getCurrentWeekType();
+    private Set<Sample> getTypeSchedule(List<Sample> list) {
+        String currentWeekType = getCurrentWeekType();
         return list.stream()
-                .filter(s -> s.getType() == 0 || s.getType() == currentWeekType)
+                .filter(s -> s.getParity().equals("0") || s.getParity().equals(currentWeekType))
                 .collect(Collectors.toSet());
     }
 
-    private int getCurrentWeekType() {
+    private String getCurrentWeekType() {
         LocalDate currentDate = LocalDate.now();
         int currentWeekNumber = currentDate.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
-        return currentWeekNumber % 2 == 0 ? 2 : 1;
+        return currentWeekNumber % 2 == 0 ? "2" : "1";
     }
 
 }

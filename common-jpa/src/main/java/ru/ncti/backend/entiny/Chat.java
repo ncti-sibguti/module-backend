@@ -19,7 +19,7 @@ import java.util.UUID;
 @Setter
 @Getter
 @Entity
-@Table(name = "chatroom")
+@Table(name = "chats")
 public class Chat {
 
     @Id

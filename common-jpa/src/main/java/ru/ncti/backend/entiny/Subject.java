@@ -21,12 +21,13 @@ import java.util.List;
 public class Subject {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_subject")
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name_subject", nullable = false)
     private String name;
 
     @OneToMany(mappedBy = "subject")
     @JsonIgnore
-    private List<Schedule> schedules;
+    private List<Sample> samples;
 }

@@ -51,9 +51,6 @@ public abstract class User implements UserDetails {
     @Column(name = "email", unique = true)
     private String email;
 
-    @Column(name = "username", unique = true)
-    private String username;
-
     @JsonIgnore
     @Column(name = "password")
     private String password;
@@ -68,14 +65,20 @@ public abstract class User implements UserDetails {
     private Set<Role> roles;
 
     @ManyToMany()
-    @JoinTable(name = "user_chatroom",
+    @JsonIgnore
+    @JoinTable(name = "user_chat",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "chatroom_id"))
+            inverseJoinColumns = @JoinColumn(name = "chat_id"))
     private List<Chat> chats;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
     private List<Message> sentMessages;
 
+    @Override
+    public String getUsername() {
+        return email;
+    }
 
     @JsonIgnore
     @Column(nullable = false)

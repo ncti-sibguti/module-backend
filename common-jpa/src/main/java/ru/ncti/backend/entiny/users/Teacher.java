@@ -3,7 +3,7 @@ package ru.ncti.backend.entiny.users;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
-import ru.ncti.backend.entiny.Schedule;
+import ru.ncti.backend.entiny.Sample;
 import ru.ncti.backend.entiny.User;
 
 import javax.persistence.CascadeType;
@@ -19,5 +19,5 @@ public class Teacher extends User {
 
     @OneToMany(mappedBy = "teacher", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<Schedule> schedules;
+    private List<Sample> samples;
 }

@@ -6,12 +6,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ScheduleDTO {
-    private String day;
+public class SampleDTO {
     private Long group;
-    private Integer numberPair;
-    private Long teacher;
+    private String day;
+    private String parity;
     private Long subject;
+    private Integer numberPair;
+    private Integer subgroup;
+    private Long teacher;
     private String classroom;
-    private Integer weekType;
 }

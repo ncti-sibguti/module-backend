@@ -53,7 +53,7 @@ public class AuthService {
 
     @Transactional(readOnly = false)
     public User register(AdminDTO dto) {
-        if (userRepository.findByUsernameOrEmail(dto.getUsername(), dto.getUsername()).isPresent()) {
+        if (userRepository.findByEmail(dto.getUsername()).isPresent()) {
             throw new UsernameNotFoundException("User " + dto.getUsername() + " already exist");
         }
         User candidate = convert(dto, Admin.class);

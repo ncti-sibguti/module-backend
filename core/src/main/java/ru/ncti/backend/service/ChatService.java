@@ -70,7 +70,7 @@ public class ChatService {
 
     public List<MessageFromChatDTO> getMessageFromChat(UUID chatId) {
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new IllegalArgumentException("Chat not found"));
-        List<Message> messages = chat.getMessages();
+        List<Message> messages = messageRepository.findAllByChatIdOrderByCreatedAtDesc(chatId);
 
         List<MessageFromChatDTO> dtos = new ArrayList<>(messages.size());
 
