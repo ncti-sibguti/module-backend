@@ -1,4 +1,4 @@
-package ru.ncti.backend.dto;
+package ru.ncti.backend.dto.chat;
 
 import lombok.Builder;
 import lombok.Getter;

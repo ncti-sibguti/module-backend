@@ -4,7 +4,8 @@ import lombok.extern.log4j.Log4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ncti.backend.dto.TeacherScheduleDTO;
+import ru.ncti.backend.dto.view.StudentViewDTO;
+import ru.ncti.backend.dto.view.TeacherViewDTO;
 import ru.ncti.backend.entiny.Sample;
 import ru.ncti.backend.entiny.users.Teacher;
 import ru.ncti.backend.repository.SampleRepository;
@@ -39,25 +40,31 @@ public class TeacherService {
     }
 
     @Transactional(readOnly = true)
-    public Teacher getProfile() {
+    public TeacherViewDTO getProfile() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
-        return (Teacher) auth.getPrincipal();
+        Teacher teacher = (Teacher) auth.getPrincipal();
+        return TeacherViewDTO.builder()
+                .firstname(teacher.getFirstname())
+                .lastname(teacher.getLastname())
+                .surname(teacher.getSurname())
+                .email(teacher.getEmail())
+                .build();
     }
 
     @Transactional(readOnly = true)
-    public Map<String, Set<TeacherScheduleDTO>> getSchedule() {
+    public Map<String, Set<StudentViewDTO.TeacherScheduleViewDTO>> getSchedule() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         Teacher teacher = (Teacher) auth.getPrincipal();
-        return makeSchedule(teacher.getSamples());
+        return makeSchedule(sampleRepository.findAllByTeacher(teacher));
     }
 
-    private Map<String, Set<TeacherScheduleDTO>> makeSchedule(List<Sample> list) {
-        Map<String, Set<TeacherScheduleDTO>> map = new HashMap<>();
+    private Map<String, Set<StudentViewDTO.TeacherScheduleViewDTO>> makeSchedule(List<Sample> list) {
+        Map<String, Set<StudentViewDTO.TeacherScheduleViewDTO>> map = new HashMap<>();
 
         for (Sample s : getTypeSchedule(list)) {
             log.info(s.getSubject().getName());
             String key = s.getDay();
-            TeacherScheduleDTO dto = TeacherScheduleDTO.builder()
+            StudentViewDTO.TeacherScheduleViewDTO dto = StudentViewDTO.TeacherScheduleViewDTO.builder()
                     .classroom(s.getClassroom())
                     .groups(List.of(s.getGroup().getName()))
                     .numberPair(s.getNumberPair())
@@ -65,7 +72,7 @@ public class TeacherService {
                     .build();
 
 // Проверяем наличие предмета с таким же номером пары и названием предмета
-            Optional<TeacherScheduleDTO> found = map.getOrDefault(key, Collections.emptySet())
+            Optional<StudentViewDTO.TeacherScheduleViewDTO> found = map.getOrDefault(key, Collections.emptySet())
                     .stream()
                     .filter(scheduleDTO ->
                             scheduleDTO.getNumberPair().equals(dto.getNumberPair()) &&
@@ -76,7 +83,7 @@ public class TeacherService {
 
 // Если предмет найден, объединяем группы
             if (found.isPresent()) {
-                TeacherScheduleDTO existing = found.get();
+                StudentViewDTO.TeacherScheduleViewDTO existing = found.get();
                 Set<String> groups = new HashSet<>(existing.getGroups());
                 groups.addAll(dto.getGroups());
                 existing.setGroups(new ArrayList<>(groups));
@@ -88,10 +95,10 @@ public class TeacherService {
         return map;
     }
 
-    private void sortedMap(Map<String, Set<TeacherScheduleDTO>> map) {
+    private void sortedMap(Map<String, Set<StudentViewDTO.TeacherScheduleViewDTO>> map) {
         map.forEach((key, value) -> {
-            Set<TeacherScheduleDTO> sortedSet = value.stream()
-                    .sorted(Comparator.comparingInt(TeacherScheduleDTO::getNumberPair))
+            Set<StudentViewDTO.TeacherScheduleViewDTO> sortedSet = value.stream()
+                    .sorted(Comparator.comparingInt(StudentViewDTO.TeacherScheduleViewDTO::getNumberPair))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
             map.put(key, sortedSet);
         });

@@ -1,12 +1,12 @@
-package ru.ncti.backend.dto;
+package ru.ncti.backend.dto.chat;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.ncti.backend.dto.chat.UserFromMessageDTO;
 
-import java.time.Instant;
 import java.util.UUID;
 
 @Getter

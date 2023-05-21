@@ -2,11 +2,11 @@ package ru.ncti.backend.service;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import ru.ncti.backend.dto.ChatDTO;
-import ru.ncti.backend.dto.ChatViewDTO;
-import ru.ncti.backend.dto.MessageDTO;
-import ru.ncti.backend.dto.MessageFromChatDTO;
-import ru.ncti.backend.dto.UserFromMessageDTO;
+import ru.ncti.backend.dto.chat.ChatDTO;
+import ru.ncti.backend.dto.chat.ChatViewDTO;
+import ru.ncti.backend.dto.chat.MessageDTO;
+import ru.ncti.backend.dto.chat.MessageFromChatDTO;
+import ru.ncti.backend.dto.chat.UserFromMessageDTO;
 import ru.ncti.backend.entiny.Chat;
 import ru.ncti.backend.entiny.Message;
 import ru.ncti.backend.entiny.User;

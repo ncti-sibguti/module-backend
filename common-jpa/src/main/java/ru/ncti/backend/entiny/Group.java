@@ -36,6 +36,9 @@ public class Group {
     @Column(name = "course")
     private Integer course;
 
-    @OneToMany(mappedBy = "group", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
     private Set<Sample> sample;
+
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    private Set<Schedule> schedules;
 }

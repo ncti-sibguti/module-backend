@@ -1,4 +1,4 @@
-package ru.ncti.backend.dto;
+package ru.ncti.backend.dto.view;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,8 +11,9 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserFromMessageDTO {
-    private String id;
-    private String firstName;
-    private String lastName;
+public class TeacherViewDTO {
+    private String firstname;
+    private String lastname;
+    private String surname;
+    private String email;
 }

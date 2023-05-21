@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.ncti.backend.dto.ChatDTO;
-import ru.ncti.backend.dto.MessageDTO;
+import ru.ncti.backend.dto.chat.ChatDTO;
+import ru.ncti.backend.dto.chat.MessageDTO;
 import ru.ncti.backend.service.ChatService;
 
 import java.util.UUID;

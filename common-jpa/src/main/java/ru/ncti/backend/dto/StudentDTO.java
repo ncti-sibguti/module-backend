@@ -10,7 +10,6 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @Setter
 public class StudentDTO {
-
     @NotBlank(message = "firstname is mandatory")
     private String firstname;
     @NotBlank(message = "lastname is mandatory")
@@ -19,7 +18,6 @@ public class StudentDTO {
     private String surname;
     @Email(message = "Email is mandatory")
     private String email;
-    private String username;
     @NotBlank(message = "password is mandatory")
     private String password;
     private String group;

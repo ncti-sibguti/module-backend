@@ -64,8 +64,8 @@ public abstract class User implements UserDetails {
     )
     private Set<Role> roles;
 
-    @ManyToMany()
     @JsonIgnore
+    @ManyToMany()
     @JoinTable(name = "user_chat",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "chat_id"))

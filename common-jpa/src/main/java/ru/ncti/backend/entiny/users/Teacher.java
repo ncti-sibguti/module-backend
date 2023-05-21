@@ -17,7 +17,7 @@ import java.util.List;
 @Entity
 public class Teacher extends User {
 
-    @OneToMany(mappedBy = "teacher", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "teacher", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Sample> samples;
 }
