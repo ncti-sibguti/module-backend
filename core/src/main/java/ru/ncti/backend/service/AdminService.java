@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ncti.backend.dto.AdminDTO;
+import ru.ncti.backend.dto.ResetPasswordDTO;
 import ru.ncti.backend.dto.GroupDTO;
-import ru.ncti.backend.dto.ResatPasswordDTO;
 import ru.ncti.backend.dto.SampleDTO;
 import ru.ncti.backend.dto.ScheduleUploadDTO;
 import ru.ncti.backend.dto.StudentDTO;
@@ -349,7 +349,7 @@ public class AdminService {
     }
 
     @Transactional(readOnly = false)
-    public String resetPasswordForUserById(ResatPasswordDTO dto) {
+    public String resetPasswordForUserById(ResetPasswordDTO dto) {
         //todo: add send email with changed password
         User candidate = userRepository.findById(dto.getId()).orElseThrow(() -> {
             log.error("User with id " + dto.getPassword() + "not found");

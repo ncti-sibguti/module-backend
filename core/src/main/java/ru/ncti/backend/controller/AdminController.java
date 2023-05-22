@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ncti.backend.dto.AdminDTO;
 import ru.ncti.backend.dto.GroupDTO;
-import ru.ncti.backend.dto.ResatPasswordDTO;
+import ru.ncti.backend.dto.ResetPasswordDTO;
 import ru.ncti.backend.dto.SampleDTO;
 import ru.ncti.backend.dto.StudentDTO;
 import ru.ncti.backend.dto.SubjectDTO;
@@ -151,7 +151,7 @@ public class AdminController {
     }
 
     @PutMapping("/reset")
-    public ResponseEntity<?> resetPassword(@RequestBody ResatPasswordDTO dto) {
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDTO dto) {
         return ResponseEntity.status(HttpStatus.OK).body(adminService.resetPasswordForUserById(dto));
     }
 

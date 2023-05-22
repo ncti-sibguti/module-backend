@@ -1,11 +1,15 @@
 package ru.ncti.backend.service;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ncti.backend.dto.ChangePasswordDTO;
 import ru.ncti.backend.dto.UserDTO;
+import ru.ncti.backend.entiny.User;
 import ru.ncti.backend.repository.RoleRepository;
 import ru.ncti.backend.repository.UserRepository;
 
@@ -29,8 +33,23 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User " + email + " not found"));
     }
 
+    public String changePassword(ChangePasswordDTO dto, PasswordEncoder passwordEncoder) throws IllegalArgumentException {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+
+        if (dto.getPassword() == null || dto.getPassword().length() <= 5) {
+            throw new IllegalArgumentException("Не удалось поменять пароль");
+        }
+
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        userRepository.save(user);
+        return "Пароль успешно изменен";
+    }
+
     @Transactional(readOnly = true)
     public List<UserDTO> getUsers(String type) {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) auth.getPrincipal();
 //        if (type != null) {
 //            switch (type) {
 //                case "student" -> {
@@ -54,14 +73,16 @@ public class UserService implements UserDetailsService {
         List<UserDTO> users = new ArrayList<>();
 
         userRepository.findAll().forEach(user -> {
-            users.add(UserDTO.builder()
-                    .id(user.getId())
-                    .firstname(user.getFirstname())
-                    .lastname(user.getLastname())
-                    .surname(user.getSurname())
-                    .email(user.getEmail())
-                    .username(user.getUsername())
-                    .build());
+            if (!user.getId().equals(currentUser.getId()) && user.getId() != 1) {
+                users.add(UserDTO.builder()
+                        .id(user.getId())
+                        .firstname(user.getFirstname())
+                        .lastname(user.getLastname())
+                        .surname(user.getSurname())
+                        .email(user.getEmail())
+                        .username(user.getUsername())
+                        .build());
+            }
         });
 
         return users;
