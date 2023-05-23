@@ -5,15 +5,14 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 import lombok.extern.log4j.Log4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.ncti.backend.dto.AdminDTO;
-import ru.ncti.backend.dto.ResetPasswordDTO;
 import ru.ncti.backend.dto.GroupDTO;
+import ru.ncti.backend.dto.ResetPasswordDTO;
 import ru.ncti.backend.dto.SampleDTO;
 import ru.ncti.backend.dto.ScheduleUploadDTO;
 import ru.ncti.backend.dto.StudentDTO;
@@ -28,7 +27,6 @@ import ru.ncti.backend.entiny.User;
 import ru.ncti.backend.entiny.users.Admin;
 import ru.ncti.backend.entiny.users.Student;
 import ru.ncti.backend.entiny.users.Teacher;
-import ru.ncti.backend.model.Email;
 import ru.ncti.backend.repository.AdminRepository;
 import ru.ncti.backend.repository.GroupRepository;
 import ru.ncti.backend.repository.RoleRepository;
@@ -50,7 +48,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static ru.ncti.backend.rabbitmq.model.RabbitQueue.EMAIL_UPDATE;
 
 @Service
 @Log4j
@@ -65,7 +62,6 @@ public class AdminService {
     private final AdminRepository adminRepository;
     private final SampleRepository sampleRepository;
     private final UserRepository userRepository;
-    private final RabbitTemplate rabbitTemplate;
     private final SubjectRepository subjectRepository;
 
     public AdminService(StudentRepository studentRepository,
@@ -77,7 +73,6 @@ public class AdminService {
                         AdminRepository adminRepository,
                         SampleRepository sampleRepository,
                         UserRepository userRepository,
-                        RabbitTemplate rabbitTemplate,
                         SubjectRepository subjectRepository) {
         this.studentRepository = studentRepository;
         this.modelMapper = modelMapper;
@@ -88,7 +83,6 @@ public class AdminService {
         this.adminRepository = adminRepository;
         this.sampleRepository = sampleRepository;
         this.userRepository = userRepository;
-        this.rabbitTemplate = rabbitTemplate;
         this.subjectRepository = subjectRepository;
     }
 
@@ -388,19 +382,19 @@ public class AdminService {
         return currentWeekNumber % 2 == 0 ? "2" : "1";
     }
 
-    private void createEmailNotification(User dto, String password) {
-        Email email = Email.builder()
-                .to(dto.getEmail())
-                .subject("Добро пожаловать в мобильное приложение.")
-                .template("welcome-email.html")
-                .properties(new HashMap<>() {{
-                    put("name", dto.getFirstname());
-                    put("subscriptionDate", LocalDate.now().toString());
-                    put("login", dto.getUsername());
-                    put("password", password);
-                }})
-                .build();
-
-        rabbitTemplate.convertAndSend(EMAIL_UPDATE, email);
-    }
+//    private void createEmailNotification(User dto, String password) {
+//        Email email = Email.builder()
+//                .to(dto.getEmail())
+//                .subject("Добро пожаловать в мобильное приложение.")
+//                .template("welcome-email.html")
+//                .properties(new HashMap<>() {{
+//                    put("name", dto.getFirstname());
+//                    put("subscriptionDate", LocalDate.now().toString());
+//                    put("login", dto.getUsername());
+//                    put("password", password);
+//                }})
+//                .build();
+//
+//        rabbitTemplate.convertAndSend(EMAIL_UPDATE, email);
+//    }
 }
