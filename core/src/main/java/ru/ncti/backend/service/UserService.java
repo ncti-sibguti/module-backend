@@ -54,37 +54,8 @@ public class UserService implements UserDetailsService {
 
         final List<UserDTO> users = new ArrayList<>();
 
-        switch (type) {
-            case "student" -> {
-                roleRepository.findByName("ROLE_STUDENT")
-                        .ifPresent(role -> {
-                            userRepository
-                                    .findAllByRolesIn(Set.of(role))
-                                    .forEach(s -> users.add(UserDTO.builder()
-                                            .id(s.getId())
-                                            .firstname(s.getFirstname())
-                                            .lastname(s.getLastname())
-                                            .surname(s.getSurname())
-                                            .email(s.getEmail())
-                                            .username(s.getUsername())
-                                            .build()));
-                        });
-            }
-            case "teacher" -> {
-                roleRepository.findByName("ROLE_TEACHER")
-                        .ifPresent(role -> {
-                            userRepository.findAllByRolesIn(Set.of(role))
-                                    .forEach(s -> users.add(UserDTO.builder()
-                                            .id(s.getId())
-                                            .firstname(s.getFirstname())
-                                            .lastname(s.getLastname())
-                                            .surname(s.getSurname())
-                                            .email(s.getEmail())
-                                            .username(s.getUsername())
-                                            .build()));
-                        });
-            }
-            default -> userRepository.findAll().forEach(user -> {
+        if (type == null) {
+            userRepository.findAll().forEach(user -> {
                 if (!user.getId().equals(currentUser.getId()) && user.getId() != 1) {
                     users.add(UserDTO.builder()
                             .id(user.getId())
@@ -96,8 +67,38 @@ public class UserService implements UserDetailsService {
                             .build());
                 }
             });
-
         }
+
+        if (type.equals("student")) {
+            roleRepository.findByName("ROLE_STUDENT")
+                    .ifPresent(role -> {
+                        userRepository
+                                .findAllByRolesIn(Set.of(role))
+                                .forEach(s -> users.add(UserDTO.builder()
+                                        .id(s.getId())
+                                        .firstname(s.getFirstname())
+                                        .lastname(s.getLastname())
+                                        .surname(s.getSurname())
+                                        .email(s.getEmail())
+                                        .username(s.getUsername())
+                                        .build()));
+                    });
+        }
+        if (type.equals("teacher")) {
+            roleRepository.findByName("ROLE_TEACHER")
+                    .ifPresent(role -> {
+                        userRepository.findAllByRolesIn(Set.of(role))
+                                .forEach(s -> users.add(UserDTO.builder()
+                                        .id(s.getId())
+                                        .firstname(s.getFirstname())
+                                        .lastname(s.getLastname())
+                                        .surname(s.getSurname())
+                                        .email(s.getEmail())
+                                        .username(s.getUsername())
+                                        .build()));
+                    });
+        }
+
         return users;
     }
 }
