@@ -12,6 +12,7 @@ import ru.ncti.backend.model.Email;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import static ru.ncti.backend.rabbitmq.model.RabbitQueue.EMAIL_UPDATE;
 

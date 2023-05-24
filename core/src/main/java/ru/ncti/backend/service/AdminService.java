@@ -46,7 +46,6 @@ import java.time.temporal.WeekFields;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -392,19 +391,16 @@ public class AdminService {
     }
 
     private void createEmailNotification(User dto, String password) {
-        Map<String, String> properties = new HashMap<>();
-
-        properties.put("name", dto.getFirstname());
-        properties.put("subscriptionDate", LocalDate.now().toString());
-        properties.put("login", dto.getUsername());
-        properties.put("password", password);
-
-
         Email email = Email.builder()
                 .to(dto.getEmail())
                 .subject("Добро пожаловать в мобильное приложение.")
                 .template("welcome-email.html")
-                .properties(properties)
+                .properties(new HashMap<>() {{
+                    put("name", dto.getFirstname());
+                    put("subscriptionDate", LocalDate.now().toString());
+                    put("login", dto.getUsername());
+                    put("password", password);
+                }})
                 .build();
 
         rabbitTemplate.convertAndSend(EMAIL_UPDATE, email);
