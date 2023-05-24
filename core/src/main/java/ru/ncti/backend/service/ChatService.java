@@ -1,5 +1,6 @@
 package ru.ncti.backend.service;
 
+import lombok.extern.log4j.Log4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ru.ncti.backend.dto.chat.ChatDTO;
@@ -16,10 +17,12 @@ import ru.ncti.backend.repository.UserRepository;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Log4j
 public class ChatService {
 
     private final ChatRepository chatRepository;
@@ -69,7 +72,6 @@ public class ChatService {
     }
 
     public List<MessageFromChatDTO> getMessageFromChat(UUID chatId) {
-        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new IllegalArgumentException("Chat not found"));
         List<Message> messages = messageRepository.findAllByChatIdOrderByCreatedAtDesc(chatId);
 
         List<MessageFromChatDTO> dtos = new ArrayList<>(messages.size());
@@ -106,6 +108,32 @@ public class ChatService {
 
         return "OK";
     }
+
+    public String leaveChat(UUID chatId) {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+
+        Chat chat = chatRepository
+                .findById(chatId)
+                .orElseThrow(() -> new IllegalArgumentException("Нет такого чата"));
+
+        Iterator<User> iterator = chat.getUsers().iterator();
+        while (iterator.hasNext()) {
+            User u = iterator.next();
+            if (u.getId().equals(user.getId())) {
+                iterator.remove();
+            }
+        }
+
+        if (chat.getUsers().isEmpty()) {
+            chatRepository.delete(chat);
+            return "Вы вышли из чата";
+        }
+
+        chatRepository.save(chat);
+        return "Вы вышли из чата";
+    }
+
 
 }
 

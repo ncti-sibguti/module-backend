@@ -5,6 +5,7 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 import lombok.extern.log4j.Log4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ import ru.ncti.backend.entiny.User;
 import ru.ncti.backend.entiny.users.Admin;
 import ru.ncti.backend.entiny.users.Student;
 import ru.ncti.backend.entiny.users.Teacher;
+import ru.ncti.backend.model.Email;
 import ru.ncti.backend.repository.AdminRepository;
 import ru.ncti.backend.repository.GroupRepository;
 import ru.ncti.backend.repository.RoleRepository;
@@ -44,9 +46,12 @@ import java.time.temporal.WeekFields;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
+import static ru.ncti.backend.rabbitmq.model.RabbitQueue.EMAIL_UPDATE;
 
 
 @Service
@@ -64,6 +69,8 @@ public class AdminService {
     private final UserRepository userRepository;
     private final SubjectRepository subjectRepository;
 
+    private final RabbitTemplate rabbitTemplate;
+
     public AdminService(StudentRepository studentRepository,
                         ModelMapper modelMapper,
                         PasswordEncoder passwordEncoder,
@@ -73,7 +80,8 @@ public class AdminService {
                         AdminRepository adminRepository,
                         SampleRepository sampleRepository,
                         UserRepository userRepository,
-                        SubjectRepository subjectRepository) {
+                        SubjectRepository subjectRepository,
+                        RabbitTemplate rabbitTemplate) {
         this.studentRepository = studentRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
@@ -84,6 +92,7 @@ public class AdminService {
         this.sampleRepository = sampleRepository;
         this.userRepository = userRepository;
         this.subjectRepository = subjectRepository;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @Transactional(readOnly = true)
@@ -123,7 +132,7 @@ public class AdminService {
 
         studentRepository.save(student);
 
-//        createEmailNotification(student, dto.getPassword());
+        createEmailNotification(student, dto.getPassword());
 
         return student;
     }
@@ -141,7 +150,7 @@ public class AdminService {
 
         teacherRepository.save(teacher);
 
-//        createEmailNotification(teacher, dto.getPassword());
+        createEmailNotification(teacher, dto.getPassword());
 
         return teacher;
     }
@@ -382,19 +391,22 @@ public class AdminService {
         return currentWeekNumber % 2 == 0 ? "2" : "1";
     }
 
-//    private void createEmailNotification(User dto, String password) {
-//        Email email = Email.builder()
-//                .to(dto.getEmail())
-//                .subject("Добро пожаловать в мобильное приложение.")
-//                .template("welcome-email.html")
-//                .properties(new HashMap<>() {{
-//                    put("name", dto.getFirstname());
-//                    put("subscriptionDate", LocalDate.now().toString());
-//                    put("login", dto.getUsername());
-//                    put("password", password);
-//                }})
-//                .build();
-//
-//        rabbitTemplate.convertAndSend(EMAIL_UPDATE, email);
-//    }
+    private void createEmailNotification(User dto, String password) {
+        Map<String, String> properties = new HashMap<>();
+
+        properties.put("name", dto.getFirstname());
+        properties.put("subscriptionDate", LocalDate.now().toString());
+        properties.put("login", dto.getUsername());
+        properties.put("password", password);
+
+
+        Email email = Email.builder()
+                .to(dto.getEmail())
+                .subject("Добро пожаловать в мобильное приложение.")
+                .template("welcome-email.html")
+                .properties(properties)
+                .build();
+
+        rabbitTemplate.convertAndSend(EMAIL_UPDATE, email);
+    }
 }

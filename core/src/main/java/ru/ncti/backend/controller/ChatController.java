@@ -24,7 +24,6 @@ public class ChatController {
         this.chatService = chatService;
     }
 
-
     @GetMapping()
     public ResponseEntity<?> getChatsFromUser() {
         return ResponseEntity.ok(chatService.getChatsFromUser());
@@ -35,7 +34,6 @@ public class ChatController {
         return ResponseEntity.status(HttpStatus.OK).body(chatService.getMessageFromChat(uuid));
     }
 
-
     @PostMapping("/create")
     public ResponseEntity<?> createChatroom(@RequestBody ChatDTO chatDTO) {
         return ResponseEntity.status(HttpStatus.OK).body(chatService.createChatroom(chatDTO));
@@ -44,6 +42,11 @@ public class ChatController {
     @PostMapping("/{chatId}")
     public ResponseEntity<?> sendMessage(@PathVariable("chatId") UUID uuid, @RequestBody MessageDTO messageDTO) {
         return ResponseEntity.status(HttpStatus.OK).body(chatService.sendMessage(uuid, messageDTO));
+    }
+
+    @PostMapping("/{chatId}/logout")
+    public ResponseEntity<?> leaveChat(@PathVariable("chatId") UUID uuid) {
+        return ResponseEntity.status(HttpStatus.OK).body(chatService.leaveChat(uuid));
     }
 
 }

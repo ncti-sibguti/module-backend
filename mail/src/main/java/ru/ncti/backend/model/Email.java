@@ -18,5 +18,5 @@ public class Email {
     String subject;
     String text;
     String template;
-    Map<String, Object> properties;
+    Map<String, ?> properties;
 }
