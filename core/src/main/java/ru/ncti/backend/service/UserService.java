@@ -67,9 +67,7 @@ public class UserService implements UserDetailsService {
                             .build());
                 }
             });
-        }
-
-        if (type.equals("student")) {
+        } else if (type.equals("student")) {
             roleRepository.findByName("ROLE_STUDENT")
                     .ifPresent(role -> {
                         userRepository
@@ -83,8 +81,7 @@ public class UserService implements UserDetailsService {
                                         .username(s.getUsername())
                                         .build()));
                     });
-        }
-        if (type.equals("teacher")) {
+        } else if (type.equals("teacher")) {
             roleRepository.findByName("ROLE_TEACHER")
                     .ifPresent(role -> {
                         userRepository.findAllByRolesIn(Set.of(role))
